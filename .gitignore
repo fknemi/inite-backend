@@ -6,6 +6,18 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
+# VS Code Settings
+.vscode
+# Config
+config.json
+
+# Test Files
+test.ts
+
+# yarn Lock File
+yarn.lock
+
+
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
@@ -42,13 +54,14 @@ node_modules/
 jspm_packages/
 
 # TypeScript v1 declaration files
-typings/
+@types
 
 # TypeScript cache
 *.tsbuildinfo
 
 # Optional npm cache directory
 .npm
+
 
 # Optional eslint cache
 .eslintcache
