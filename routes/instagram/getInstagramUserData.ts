@@ -15,7 +15,6 @@ router.post("/user/get", async (req: Request, res: Response) => {
       userid: process.env.USER_ID,
       sessionid: process.env.SESSION_ID,
     });
-    // console.log(user);
     
     if (!user) {
       return res.status(404).send("User Not Found");

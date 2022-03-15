@@ -34,7 +34,7 @@ router.post("/instagram/unfollow", async (req: Request, res: Response) => {
       break;
     }
   }
-
+  user.followingCount--;
   await iguser.save();
   await user.save();
   return res.send("OK");

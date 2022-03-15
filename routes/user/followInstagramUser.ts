@@ -42,6 +42,7 @@ router.post("/instagram/follow", async (req: Request, res: Response) => {
 
   user.following.push({ instagramUser: iguser._id });
   user.followingHistory.push({ instagramUser: iguser._id });
+  user.followingCount++;
   iguser.followedBy.push({ user: user._id });
   await user.save();
   await iguser.save();

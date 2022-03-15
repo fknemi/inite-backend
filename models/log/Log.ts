@@ -1,7 +1,7 @@
 import { Schema, model } from "mongoose";
 
 
-const logSchema = new Schema({
+const logSchema: Schema = new Schema({
   text: {
     type: String,
     required: true,

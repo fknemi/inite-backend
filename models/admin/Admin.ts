@@ -1,5 +1,5 @@
 import mongoose, { Schema, model } from "mongoose";
-const adminSchema = new Schema({
+const adminSchema: Schema = new Schema({
   userInfo: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   isAdmin: {
     type: Boolean,

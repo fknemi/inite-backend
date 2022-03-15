@@ -8,15 +8,19 @@ lerna-debug.log*
 
 # VS Code Settings
 .vscode
-# Config
-config.json
+
+# Local DB
+users.db
 
 # Test Files
 test.ts
 
-# yarn Lock File
-yarn.lock
+# Typescript Compiled Files
+src
 
+# Yarn Generated Files
+.yarn-error.log
+yarn.lock
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json

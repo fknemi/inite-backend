@@ -1,6 +1,6 @@
 import { Schema, model } from "mongoose";
 import mongoose from "mongoose";
-const instagramUserSchema = new Schema({
+const instagramUserSchema: Schema = new Schema({
   name: {
     type: String,
     trim: true,

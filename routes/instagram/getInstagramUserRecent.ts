@@ -19,13 +19,13 @@ router.post("/get/recent", async (req: Request, res: Response) => {
   let updateBiography = Boolean(user.biography.length);
   let updateAvatars = Boolean(user.avatars.length);
   let changes: any = {
-    name: {isRecent: false, value: undefined},
-    biography: {isRecent: false, value: undefined},
-    avatar: {isRecent: false, value: undefined},
-    isPrivate: {isRecent: false, value: undefined},
-    followedByCount: {isRecent: false, value: undefined},
-    followingCount: {isRecent: false, value: undefined},
-    postsCount: {isRecent: false, value: undefined},
+    name: { isRecent: false, value: undefined },
+    biography: { isRecent: false, value: undefined },
+    avatar: { isRecent: false, value: undefined },
+    isPrivate: { isRecent: false, value: undefined },
+    followedByCount: { isRecent: false, value: undefined },
+    followingCount: { isRecent: false, value: undefined },
+    postsCount: { isRecent: false, value: undefined },
   };
 
   const currentUser = {
@@ -79,11 +79,9 @@ router.post("/get/recent", async (req: Request, res: Response) => {
   let is_diff;
 
   if (avatar && currentAvatar) {
-    is_diff = updateAvatars
-      ? await is_same(avatar, currentAvatar).catch((err: string) =>
-          console.log(err)
-        )
-      : false;
+    is_diff = await is_same(currentUser.avatar, avatar).catch((err: any) => {
+      return false;
+    });
   } else {
     is_diff = false;
   }
@@ -94,7 +92,7 @@ router.post("/get/recent", async (req: Request, res: Response) => {
       `InstagramUsers/${req.body.username}/avatars`
     );
     changes.avatar.isRecent = true;
-    changes.avatar.value = avatar
+    changes.avatar.value = avatar;
     if (updateAvatars) {
       for (let i = 0; i <= user.avatars.length - 1; i++) {
         let item = user.avatars[i];
@@ -106,27 +104,27 @@ router.post("/get/recent", async (req: Request, res: Response) => {
   if (user.name !== currentUser.name) {
     user.name = currentUser.name;
     changes.name.isRecent = true;
-    changes.name.value = currentUser.name
+    changes.name.value = currentUser.name;
   }
   if (user.isPrivate !== currentUser.isPrivate) {
     user.isPrivate = currentUser.isPrivate;
     changes.isPrivate.isRecent = true;
-    changes.isPrivate.value = currentUser.isPrivate
+    changes.isPrivate.value = currentUser.isPrivate;
   }
   if (user.followedByCount !== currentUser.followedByCount) {
     user.followedByCount = currentUser.followedByCount;
     changes.followedByCount.isRecent = true;
-    changes.followedByCount.value = currentUser.followedByCount
+    changes.followedByCount.value = currentUser.followedByCount;
   }
   if (user.followingCount !== currentUser.followingCount) {
     user.followingCount = currentUser.followingCount;
     changes.followingCount.isRecent = true;
-    changes.followingCount.value = currentUser.followingCount
+    changes.followingCount.value = currentUser.followingCount;
   }
   if (user.postsCount !== currentUser.postsCount) {
     user.postsCount = currentUser.postsCount;
     changes.postsCount.isRecent = true;
-    changes.name.postsCount = currentUser.postsCount
+    changes.name.postsCount = currentUser.postsCount;
   }
   if (user.recentlyAdded) {
     user.recentlyAdded = false;

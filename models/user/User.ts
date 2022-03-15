@@ -2,7 +2,7 @@ import mongoose, { Schema, model } from "mongoose";
 import validator from "validator";
 import bcrypt from "bcrypt";
 
-const userSchema = new Schema({
+const userSchema: Schema = new Schema({
   name: {
     type: String,
     required: true,
@@ -109,10 +109,6 @@ const userSchema = new Schema({
     type: [{ String }],
     required: false,
   },
-  isCollect: {
-    type: Boolean,
-    default: false,
-  },
   isAdmin: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Admin",
@@ -121,9 +117,19 @@ const userSchema = new Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Owner",
   },
+  notifications: {
+    type: [
+      {
+        newPosts: {
+          type: Boolean,
+          default: true,
+        },
+      },
+    ],
+  },
   notifyEmail: {
     type: Boolean,
-    default: false,
+    default: true,
   },
   timestamp: {
     type: String,

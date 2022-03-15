@@ -4,7 +4,17 @@ import { User } from "../../models/user/User";
 import { generateTokens } from "../../auth";
 const router = Router();
 router.post("/login/", async (req: Request, res: Response) => {
-  let admin = res.locals.admin;
+  let admin: {
+    userInfo: {
+      name: string;
+      username: string;
+      avatar: string;
+      isBanned: boolean;
+      emailVerified: boolean;
+    };
+    isAdmin: boolean;
+    adminPermissions: Object;
+  } = res.locals.admin;
   const user = res.locals.user;
   const owner = res.locals.owner;
   let permissions;
@@ -27,9 +37,9 @@ router.post("/login/", async (req: Request, res: Response) => {
     return res.status(404).send("Invalid Login");
   }
 
-if(username !== user.username){
-  return res.status(400).send("Invalid User")
-}
+  if (username !== user.username) {
+    return res.status(400).send("Invalid User");
+  }
 
   const adminData = {
     name: admin.userInfo.name,

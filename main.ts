@@ -1,4 +1,3 @@
-const data = require("./config.json")
 const lsp = require("looks-same-plus");
 import cloudinary from "cloudinary";
 import { Log } from "./models/log/Log";
@@ -6,9 +5,15 @@ const shortUniqueId = require("short-unique-id");
 const { getUserByUsername } = require("instagram-stories");
 const uid = new shortUniqueId();
 cloudinary.v2.config({
-  cloud_name: data.cloud_name,
-  api_key: data.api_key,
-  api_secret: data.api_secret,
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.API_KEY,
+  api_secret: process.env.API_SECRET,
+});
+let Datastore = require("nedb");
+export let db = new Datastore({
+  filename: "users.db",
+  autoload: true,
+  unique: true,
 });
 // ---------------------- Image Comparison -----------------------------------
 export const is_same = async (img1: string, img2: string) => {
@@ -92,10 +97,9 @@ export const sendEmail = async (
 ) => {
   if (type === "PASSWORD_RESET_OWNER") {
     console.log(password);
-  } else if(type === "PASSWORD_RESET"){
+  } else if (type === "PASSWORD_RESET") {
     console.log(`http://localhost:3000/account/verify/password/${token}`);
-  }
-  else {
+  } else {
     console.log(`http://localhost:3000/account/verify/email/${token}`);
   }
   return true;
@@ -113,95 +117,176 @@ export const generatePassword = () => {
 };
 
 export const updateInstagramUser = async (currentUser: any, user: any) => {
-  console.log(currentUser.followingCount);
-  let biography: any;
-  let avatar: any;
-  let updateBiography = Boolean(user.biography.length);
-  let updateAvatars = Boolean(user.avatars.length);
-  if (updateBiography) {
+  let biography;
+  let avatar;
+  if (!user.recentlyAdded) {
     for (let i = 0; i <= user.biography.length - 1; i++) {
-      if (user.biography[i].recent || user.recentlyAdded) {
+      if (user.biography[i].recent) {
         biography = user.biography[i].text;
         break;
       }
     }
-  }
-  if (updateAvatars) {
     for (let i = 0; i <= user.avatars.length - 1; i++) {
-      if (user.avatars[i].recent || user.recentlyAdded) {
+      if (user.avatars[i].recent) {
         avatar = user.avatars[i].url;
         break;
       }
     }
+  } else {
+    biography = user.biography[0].text;
+    avatar = user.avatars[0].url;
   }
 
-  if (biography !== currentUser.biography) {
-    if (updateBiography) {
-      for (let s = 0; s <= user.biography.length - 1; s++) {
-        let item = user.biography[s];
-        item["recent"] = false;
-      }
-    }
-    user.biography.push({ text: currentUser.biography });
+  let changedUser = {
+    username: user.username,
+    name: {
+      didChange: false,
+      newValue: "",
+      oldValue: "",
+    },
+    biography: {
+      didChange: false,
+      newValue: "",
+      oldValue: "",
+    },
+    avatar: {
+      didChange: false,
+      newValue: "",
+      oldValue: "",
+    },
+    isPrivate: {
+      didChange: false,
+      newValue: "",
+      oldValue: "",
+    },
+    followedByCount: {
+      didChange: false,
+      newValue: "",
+      oldValue: "",
+    },
+    followingCount: {
+      didChange: false,
+      newValue: "",
+      oldValue: "",
+    },
+    postsCount: {
+      didChange: false,
+      newValue: "",
+      oldValue: "",
+    },
+  };
+  let is_diff;
+  if (avatar && currentUser.avatar) {
+    is_diff = await is_same(currentUser.avatar, avatar).catch((err: any) => {
+      return false;
+    });
+  } else {
+    is_diff = false;
   }
-
-  const is_diff: any = updateAvatars
-    ? await is_same(avatar, currentUser.avatar).catch((err: string) =>
-        console.log(err)
-      )
-    : false;
   if (!is_diff) {
-    avatar = await uploadMedia(
-      currentUser.avatar,
-      `InstagramUsers/${user.username}/avatars`
-    );
-
-    if (updateAvatars) {
-      for (let i = 0; i <= user.avatars.length - 1; i++) {
-        let item = user.avatars[i];
-        item["recent"] = false;
-      }
+    changedUser.avatar = {
+      didChange: true,
+      oldValue: currentUser.avatar,
+      newValue: user.avatar,
+    };
+  }
+  if (user.username === currentUser.username) {
+    if (user.name !== currentUser.name) {
+      changedUser.name = {
+        didChange: true,
+        oldValue: currentUser.name,
+        newValue: user.name,
+      };
     }
-    user.avatars.push({ url: avatar });
+    if (biography !== currentUser.biography) {
+      changedUser.biography = {
+        didChange: true,
+        oldValue: currentUser.biography,
+        newValue: user.biography,
+      };
+    }
+    if (user.isPrivate !== currentUser.isPrivate) {
+      changedUser.isPrivate = {
+        didChange: true,
+        oldValue: currentUser.isPrivate,
+        newValue: user.isPrivate,
+      };
+    }
+    if (user.followedByCount !== currentUser.followedByCount) {
+      changedUser.followedByCount = {
+        didChange: true,
+        oldValue: currentUser.followedByCount,
+        newValue: user.followedByCount,
+      };
+    }
+    if (user.followingCount !== currentUser.followingCount) {
+      changedUser.followingCount = {
+        didChange: true,
+        oldValue: currentUser.followingCount,
+        newValue: user.followingCount,
+      };
+    }
+    if (user.postsCount !== currentUser.postsCount) {
+      changedUser.postsCount = {
+        didChange: true,
+        oldValue: currentUser.postsCount,
+        newValue: user.postsCount,
+      };
+    }
   }
-  if (user.name !== currentUser.name) {
-    user.name = currentUser.name;
-  }
-  if (user.isPrivate !== currentUser.isPrivate) {
-    user.isPrivate = currentUser.isPrivate;
-  }
-  if (user.followedByCount !== currentUser.followedByCount) {
-    user.followedByCount = currentUser.followedByCount;
-  }
-  if (user.followingCount !== currentUser.followingCount) {
-    user.followingCount = currentUser.followingCount;
-  }
-  if (user.postsCount !== currentUser.postsCount) {
-    user.postsCount = currentUser.postsCount;
-  }
-  if (user.recentlyAdded) {
-    user.recentlyAdded = false;
-  }
+  return changedUser;
 };
 
 export const getAllInstagramUsers = async (users: any) => {
-  const currentUsersData: Object[] = [];
-  users.forEach(async (user: any) => {
+  const currentUsersData: any = [];
+  for (let i = 0; i <= users.length - 1; i++) {
+    let username = users[i].username;
     let data = await getUserByUsername({
-      username: user.username,
+      username: username,
       userid: process.env.USER_ID,
       sessionid: process.env.SESSION_ID,
     });
+
     currentUsersData.push({
-      name: data.user.full_name,
-      username: data.user.username,
-      biography: data.user.biography,
+      name: data.user.full_name ? data.user.full_name : "",
+      username: username,
+      biography: data.user.biography ? data.user.biography : "",
       avatar: data.user.profile_pic_url_hd,
       isPrivate: data.user.is_private,
       followedByCount: data.user.edge_followed_by.count,
       followingCount: data.user.edge_follow.count,
       postsCount: data.user.edge_owner_to_timeline_media.count,
     });
-  });
+  }
   return currentUsersData;
+};
+
+export const sendBulkEmails = async (
+  userEmails: Object[],
+  allUsersChanges: Object[]
+) => {
+  console.log(userEmails);
+  console.log(allUsersChanges);
+};
+
+export const getAllUsersInDB = async () => {
+  return new Promise((resolve, reject) => {
+    db.find({}, (err: string, docs: Object[]) => {
+      if (err) {
+        return reject(err);
+      }
+      return resolve(docs);
+    });
+  });
+};
+
+export const findUserInDB = async (username: string) => {
+  return new Promise((resolve, reject) => {
+    db.findOne({ username: username }, (err: string, docs: Object[]) => {
+      if (err) {
+        return reject(false);
+      }
+      return resolve(docs);
+    });
+  });
 };
