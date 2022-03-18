@@ -35,6 +35,9 @@ import { router as getAdminData } from "./admin/getAdminData";
 import { router as getInstagramUserMedia } from "./instagram/getInstagramUserMedia";
 import { router as getInstagramUserDetails } from "./owner/getInstagramUserDetails";
 import { router as getUserDetails } from "./owner/getUserDetails";
+import { router as getAllUsers } from "./owner/getAllUsers";
+import { router as getAllInstagramUsers } from "./owner/getAllInstagramUsers";
+import { router as updateNotificationSettings } from "./user/updateNotificationSettings";
 // import { router as addOwner } from "./owner/addOwner";
 const router = Router();
 const admin = Router();
@@ -55,6 +58,7 @@ router.use(verifyEmailToken);
 router.use(verifyUserEmail);
 router.use(reportUser);
 router.use(updatePassword);
+router.use(updateNotificationSettings);
 
 // Instagram
 instagram.use(updateInstagramUserMedia);
@@ -73,6 +77,8 @@ owner.use(resetUserPassword);
 owner.use(getLogs);
 owner.use(getInstagramUserDetails);
 owner.use(getUserDetails);
+owner.use(getAllUsers);
+owner.use(getAllInstagramUsers);
 // owner.use(addOwner);
 
 // Admin

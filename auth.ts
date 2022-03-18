@@ -1,10 +1,10 @@
-import { NextFunction } from "express";
+import { NextFunction, Request, Response } from "express";
 import * as jwt from "jsonwebtoken";
-import { models } from "mongoose";
+import { models, HydratedDocument } from "mongoose";
 import { User } from "./models/user/User";
 import { Owner } from "./models/owner/Owner";
 import { Admin } from "./models/admin/Admin";
-
+import * as modelTypes from "./common/models";
 export const generateTokens = async (user: any, refreshSecret: string) => {
   const token = jwt.sign({ _id: user._id }, process.env.SECRET as any, {
     expiresIn: "1h",
@@ -25,7 +25,9 @@ export const refreshTokens = async (token: string, refreshToken: string) => {
   if (!userId) {
     return {};
   }
-  const user: any = await models.User.findById(userId);
+  const user: any = await models.User.findById(
+    userId
+  );
   if (!user) {
     return {};
   }
@@ -56,15 +58,22 @@ export const generateEmailVerificationToken = async (user: any) => {
   });
 };
 
-export const checkUser = async (req: any, res: any, next: NextFunction) => {
+export const checkUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const token: any = req.headers["x-token"];
   if (token) {
     try {
-      const userId: any = jwt.verify(token, process.env.SECRET as string);
+      const userId: string | jwt.JwtPayload = jwt.verify(
+        token,
+        process.env.SECRET as string
+      );
       const user = await User.findById(userId);
       res.locals.user = user;
     } catch (err: any) {
-      const refreshToken = req.headers["x-refresh-token"];
+      const refreshToken: any = req.headers["x-refresh-token"];
       const newTokens: any = await refreshTokens(token, refreshToken);
       if (newTokens.token && newTokens.refreshtoken) {
         res.set({

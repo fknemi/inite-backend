@@ -12,11 +12,9 @@ lerna-debug.log*
 # Local DB
 users.db
 
+
 # Test Files
 test.ts
-
-# Typescript Compiled Files
-src
 
 # Yarn Generated Files
 .yarn-error.log

@@ -7,6 +7,9 @@ import { checkUser, checkAdmin, checkOwner } from "./auth";
 import { updateInstagramUsers, deleteCloudinaryTemp } from "./cron-jobs/jobs";
 import * as http from "http";
 import { Server, Socket } from "socket.io";
+import * as jwt from "jsonwebtoken";
+import { User } from "./models/user/User";
+import { db, findUserInDB } from "./main";
 
 const app = express();
 app.use(express.json());
@@ -35,7 +38,44 @@ const startServer = async () => {
     });
   updateInstagramUsers.start();
   deleteCloudinaryTemp.start();
-  io.on("connection", (socket: Socket) => {
+  io.on("connection", async (socket: Socket) => {
+    let userId;
+    try {
+      userId = jwt.verify(
+        socket.handshake.auth["x-token"],
+        process.env.SECRET as string
+      );
+    } catch (err) {
+      socket.emit("error", "Authentication Error");
+      return;
+    }
+    const user: any = await User.findById(userId).populate(
+      "following.instagramUser"
+    );
+    let getUser: any;
+    try {
+      getUser = await findUserInDB(user.username);
+    } catch (err) {
+      console.log(err);
+    }
+    if (getUser) {
+      socket.emit("notifications", getUser.data);
+      socket.on("status", (status: string) => {
+        if (parseInt(status) === 200) {
+          db.remove(
+            { username: user.username },
+            {},
+            (err: any, numRemoved: any) => {
+              if (err) {
+                console.log(err);
+              } else {
+                console.log("Removed");
+              }
+            }
+          );
+        }
+      });
+    }
     console.log("User Connected");
 
     socket.on("disconnect", () => console.log("user disconnected"));

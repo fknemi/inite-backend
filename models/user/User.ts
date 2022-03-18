@@ -106,7 +106,12 @@ const userSchema: Schema = new Schema({
     required: false,
   },
   reports: {
-    type: [{ String }],
+    type: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Report",
+      },
+    ],
     required: false,
   },
   isAdmin: {
@@ -118,14 +123,34 @@ const userSchema: Schema = new Schema({
     ref: "Owner",
   },
   notifications: {
-    type: [
-      {
-        newPosts: {
-          type: Boolean,
-          default: true,
-        },
-      },
-    ],
+    newAccountNameChange: {
+      type: Boolean,
+      default: true,
+    },
+    newPosts: {
+      type: Boolean,
+      default: true,
+    },
+    newFollowers: {
+      type: Boolean,
+      default: true,
+    },
+    startedFollowingNewUsers: {
+      type: Boolean,
+      default: true,
+    },
+    newBiography: {
+      type: Boolean,
+      default: true,
+    },
+    newAvatar: {
+      type: Boolean,
+      default: true,
+    },
+    newAccountPrivacyChange: {
+      type: Boolean,
+      default: true,
+    },
   },
   notifyEmail: {
     type: Boolean,

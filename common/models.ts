@@ -1,0 +1,23 @@
+export type User = {
+  name: string;
+  username: string;
+  password: string;
+  email: string;
+  gender: string;
+  avatar: string;
+  emailVerified: boolean;
+  instagramVerified: boolean;
+  media: Object[];
+  followLimit: number;
+  followingCount: number;
+  following: Object[];
+  followingHistory: Object[];
+  isBanned: boolean;
+  banReason: string;
+  reports: Object[];
+  isAdmin: Object;
+  isOwner: Object;
+  notifications: Object[];
+  notifyEmail: boolean;
+  timestamp: string;
+};

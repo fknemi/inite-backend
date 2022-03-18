@@ -1,4 +1,4 @@
-// Get Specific User Instagram Data By Username
+// Get Specific User Details
 import { instagramUser } from "../../models/ig/instagramUser";
 import { Router, Request, Response } from "express";
 import { uploadMedia } from "../../main";
@@ -46,6 +46,8 @@ router.post("/user/details", async (req: Request, res: Response) => {
     timestamp: user.timestamp,
     following: following,
     followingHistory: followingHistory,
+    followLimit: user.followLimit,
+    followingCount: user.followingCount,
   };
 
   return res.send(userData);

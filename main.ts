@@ -3,6 +3,7 @@ import cloudinary from "cloudinary";
 import { Log } from "./models/log/Log";
 const shortUniqueId = require("short-unique-id");
 const { getUserByUsername } = require("instagram-stories");
+import * as types from "./common/types";
 const uid = new shortUniqueId();
 cloudinary.v2.config({
   cloud_name: process.env.CLOUD_NAME,
@@ -137,43 +138,17 @@ export const updateInstagramUser = async (currentUser: any, user: any) => {
     avatar = user.avatars[0].url;
   }
 
-  let changedUser = {
+  let changedUser: types.changedUser = {
     username: user.username,
-    name: {
-      didChange: false,
-      newValue: "",
-      oldValue: "",
-    },
-    biography: {
-      didChange: false,
-      newValue: "",
-      oldValue: "",
-    },
-    avatar: {
-      didChange: false,
-      newValue: "",
-      oldValue: "",
-    },
-    isPrivate: {
-      didChange: false,
-      newValue: "",
-      oldValue: "",
-    },
-    followedByCount: {
-      didChange: false,
-      newValue: "",
-      oldValue: "",
-    },
-    followingCount: {
-      didChange: false,
-      newValue: "",
-      oldValue: "",
-    },
-    postsCount: {
-      didChange: false,
-      newValue: "",
-      oldValue: "",
-    },
+    name: undefined,
+    biography: undefined,
+    avatar: undefined,
+    isPrivate: undefined,
+    followedByCount: undefined,
+    followingCount: undefined,
+    postsCount: undefined,
+    timestamp: new Date().getTime(),
+    id: uid.stamp(32)
   };
   let is_diff;
   if (avatar && currentUser.avatar) {

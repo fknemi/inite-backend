@@ -16,8 +16,12 @@ router.post("/get/", async (req: Request, res: Response, context) => {
   let avatar: string;
   user.following.forEach((data: any) => {
     const iguser = data.instagramUser;
-    if(!iguser){return}
-    if(iguser.isBanned){return;}
+    if (!iguser) {
+      return;
+    }
+    if (iguser.isBanned) {
+      return;
+    }
     if (iguser.avatars.length < 1) {
       for (let i = 0; i <= iguser.avatars.length - 1; i++) {
         if (iguser.avatars[i].recent) {
@@ -46,6 +50,7 @@ router.post("/get/", async (req: Request, res: Response, context) => {
       emailVerified: user.emailVerified,
       instagramVerified: user.instagramVerified,
       followLimit: user.followLimit,
+      notifications: user.notifications,
       following: following,
       isBanned: user.isBanned,
     };

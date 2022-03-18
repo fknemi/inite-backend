@@ -8,22 +8,23 @@ import {
 import { instagramUser } from "../models/ig/instagramUser";
 import { User } from "../models/user/User";
 import * as jwt from "jsonwebtoken";
+import * as types from "../common/types";
 import { findUserInDB, getAllUsersInDB } from "../main";
 import cloudinary from "cloudinary";
-
-const cron = require("node-cron");
-
+import cron from "node-cron";
+const shortUniqueId = require("short-unique-id");
+const uid = new shortUniqueId();
 export const updateInstagramUsers = cron.schedule("30 * * * *", async () => {
   const users: any = await instagramUser.find().populate("followedBy.user");
   const usersCurrentData: any = await getAllInstagramUsers(users);
   const allUsersChanges: Object[] = [];
+
   for (let i = 0; i <= users.length - 1; i++) {
     if (users[i].username === usersCurrentData[i].username) {
       let changedUser = await updateInstagramUser(
         usersCurrentData[i],
         users[i]
       );
-
       if (changedUser) {
         allUsersChanges.push(changedUser);
       }
@@ -49,12 +50,21 @@ export const updateInstagramUsers = cron.schedule("30 * * * *", async () => {
 
   const allUsers = await User.find().populate("following.instagramUser");
 
-  allUsers.forEach(async (user: any) => {
-    let usersNotNotified: Object[] = [];
-    let isUserPresent = false;
+  allUsers.forEach(async (user: { username: string; following: Object[] }) => {
+    let usersNotNotified: {
+      username: string;
+      following: string[];
+      data: Object[];
+      timestamp: number;
+    }[] = [];
     const findUser: any = await findUserInDB(user.username);
 
-    let data: Object[] = [];
+    let data: {
+      username: string;
+      following: string[];
+      data: Object[];
+      timestamp: number;
+    }[] = [];
     let following: string[] = [];
     user.following.forEach((followedUser: any) => {
       following.push(followedUser.instagramUser.username);
@@ -65,11 +75,11 @@ export const updateInstagramUsers = cron.schedule("30 * * * *", async () => {
         data.push(followedUserChanges);
       }
     });
-
     usersNotNotified.push({
       username: user.username,
       following: following,
       data: data,
+      timestamp: new Date().getTime(),
     });
 
     if (!findUser) {
@@ -92,37 +102,40 @@ export const updateInstagramUsers = cron.schedule("30 * * * *", async () => {
   sockets.forEach(async (socket: any) => {
     try {
       const token = socket.handshake.auth["x-token"];
-      const following: string[] = [];
-      let data: Object[] = [];
-      const userId: any = jwt.verify(token, process.env.SECRET as string);
+      const userId: string | jwt.JwtPayload = jwt.verify(
+        token,
+        process.env.SECRET as string
+      );
       const user: any = await User.findById(userId).populate(
         "following.instagramUser"
       );
       const getUser: any = await findUserInDB(user.username);
-      db.remove(
-        { username: user.username },
-        {},
-        (err: any, numRemoved: any) => {
-          if (err) {
-            console.log(err);
-          } else {
-            console.log("Removed");
-          }
-        }
-      );
       socket.emit("newChangesAlert", getUser.data);
+      socket.on("status", (status: string) => {
+        if (parseInt(status) === 200) {
+          db.remove(
+            { username: user.username },
+            {},
+            (err: any, numRemoved: any) => {
+              if (err) {
+                console.log(err);
+              } else {
+                console.log("Removed");
+              }
+            }
+          );
+        }
+      });
     } catch (err) {
-      console.log(err);
-
       socket.emit("error", "Authentication Error");
     }
   });
   // To Be Implemented
-  sendBulkEmails(userEmails, allUsersChanges);
+  // sendBulkEmails(userEmails, allUsersChanges);
   console.log("Done");
 });
 
-export const deleteCloudinaryTemp = cron.schedule("* * * * *", async () => {
+export const deleteCloudinaryTemp = cron.schedule("0 0 * * 0", async () => {
   await cloudinary.v2.api
     .delete_resources_by_prefix("temp")
     .catch((err: any) => {
