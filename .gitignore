@@ -12,6 +12,8 @@ lerna-debug.log*
 # Local DB
 users.db
 
+# Typescript Compiled Files
+src
 
 # Test Files
 test.ts

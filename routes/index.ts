@@ -38,7 +38,9 @@ import { router as getUserDetails } from "./owner/getUserDetails";
 import { router as getAllUsers } from "./owner/getAllUsers";
 import { router as getAllInstagramUsers } from "./owner/getAllInstagramUsers";
 import { router as updateNotificationSettings } from "./user/updateNotificationSettings";
-// import { router as addOwner } from "./owner/addOwner";
+import { router as addOwner } from "./owner/addOwner";
+import { router as verifyUserInstagram } from "./user/verifyUserInstagram";
+import {router as unlinkUserInstagram} from "./user/unlinkUserInstagram";
 const router = Router();
 const admin = Router();
 const owner = Router();
@@ -59,7 +61,8 @@ router.use(verifyUserEmail);
 router.use(reportUser);
 router.use(updatePassword);
 router.use(updateNotificationSettings);
-
+router.use(verifyUserInstagram);
+router.use(unlinkUserInstagram);
 // Instagram
 instagram.use(updateInstagramUserMedia);
 instagram.use(addInstagramUser);
@@ -79,7 +82,7 @@ owner.use(getInstagramUserDetails);
 owner.use(getUserDetails);
 owner.use(getAllUsers);
 owner.use(getAllInstagramUsers);
-// owner.use(addOwner);
+owner.use(addOwner);
 
 // Admin
 admin.use(banUser);

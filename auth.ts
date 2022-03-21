@@ -113,9 +113,9 @@ export const checkOwner = async (req: any, res: any, next: NextFunction) => {
   const owner = await Owner.findOne({ userInfo: user._id }).populate(
     "userInfo"
   );
-  if (!owner) {
-    return res.status(401).send("Unauthorized User");
-  }
+  // if (!owner) {
+  //   return res.status(401).send("Unauthorized User");
+  // }
   res.locals.owner = owner;
   next();
 };

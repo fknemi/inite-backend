@@ -114,6 +114,11 @@ const userSchema: Schema = new Schema({
     ],
     required: false,
   },
+  instagramProfile: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "instagramUser",
+    required: false,
+  },
   isAdmin: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Admin",
