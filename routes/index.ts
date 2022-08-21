@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { router as addInstagramUser } from "./instagram/addInstagramUser";
 import { router as banInstagramUser } from "./admin/banInstagramUser";
 import { router as getInstagramUserData } from "./instagram/getInstagramUserData";
 import { router as getInstagramUserRecent } from "./instagram/getInstagramUserRecent";
@@ -63,12 +62,13 @@ router.use(updatePassword);
 router.use(updateNotificationSettings);
 router.use(verifyUserInstagram);
 router.use(unlinkUserInstagram);
+
 // Instagram
 instagram.use(updateInstagramUserMedia);
-instagram.use(addInstagramUser);
 instagram.use(getInstagramUserData);
 instagram.use(getInstagramUserRecent);
 instagram.use(getInstagramUserMedia);
+
 // Owner
 owner.use(addAdmin);
 owner.use(removeAdmin);
@@ -93,4 +93,5 @@ admin.use(readReports);
 admin.use(unbanInstagramUser);
 admin.use(adminLogin);
 admin.use(getAdminData);
+
 export { router, admin, owner, instagram };

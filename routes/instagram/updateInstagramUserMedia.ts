@@ -17,7 +17,7 @@ router.post("/update/user/media", async (req: Request, res: Response) => {
       }
     )
     if(!user){
-      return res.status(404).send({error: "Something Weird Happened..."});
+      return res.status(404).send({error: "..."});
     }
   return res.send(user);
 });

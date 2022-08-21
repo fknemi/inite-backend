@@ -1,5 +1,6 @@
 // Follow Instagram User
 import { Router, Request, Response } from "express";
+import { uploadMedia } from "../../main";
 import { instagramUser } from "../../models/ig/instagramUser";
 const router = Router();
 router.post("/instagram/follow", async (req: Request, res: Response) => {
@@ -12,9 +13,27 @@ router.post("/instagram/follow", async (req: Request, res: Response) => {
     return res.status(400).send("Reached Follow Limit");
   }
 
-  const iguser = await instagramUser.findOne({ username: req.body.username });
+  let iguser = await instagramUser.findOne({ username: req.body.username });
   if (!iguser) {
-    return res.status(404).send("User Not Found");
+    iguser = new instagramUser({
+      name: req.body.name,
+      username: req.body.username,
+      biography: [{ text: req.body.biography, recent: false }],
+      avatars: [
+        {
+          url: await uploadMedia(
+            req.body.avatar,
+            `InstagramUsers/${req.body.username}/avatars`
+          ),
+          recent: false,
+        },
+      ],
+      isPrivate: req.body.isPrivate,
+      postsCount: req.body.postsCount,
+      followingCount: req.body.followingCount,
+      followedByCount: req.body.followedByCount,
+    });
+    await iguser.save();
   }
   let isPresent: boolean = false;
   if (user.following.length) {

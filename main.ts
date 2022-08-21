@@ -99,7 +99,7 @@ export const sendEmail = async (
   if (type === "PASSWORD_RESET_OWNER") {
     console.log(password);
   } else if (type === "PASSWORD_RESET") {
-    console.log(`http://localhost:3000/account/verify/password/${token}`);
+    console.log(`http://localhost:3000/account/update/password/${token}`);
   } else {
     console.log(`http://localhost:3000/account/verify/email/${token}`);
   }

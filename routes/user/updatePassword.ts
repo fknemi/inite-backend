@@ -1,7 +1,7 @@
 import { Router, Request, Response } from "express";
 const router = Router();
 // Update User
-router.post("/user/update/password", async (req: Request, res: Response) => {
+router.post("/update/password", async (req: Request, res: Response) => {
   const { oldPassword, newPassword, confirmPassword } = req.body;
   const user = res.locals.user;
   if (!user) {

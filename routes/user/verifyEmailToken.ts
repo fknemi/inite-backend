@@ -8,9 +8,9 @@ router.post(
   async (req: Request, res: Response) => {
     try {
       const UserId = jwt.verify(req.body.token, process.env.SECRET_4 as string);
-      const user = await User.findById(UserId);
+      const user: any = await User.findById(UserId);
       if (user.emailVerified) {
-        return res.status(400).send({ name: "AlreadyVerified" });
+        return res.status(400).send();
       }
       user.emailVerified = true;
       await user.save();

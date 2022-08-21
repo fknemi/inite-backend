@@ -8,7 +8,7 @@ router.post(
   async (req: Request, res: Response) => {
     try {
       const UserId = jwt.decode(req.body.token);
-      const user = await User.findById(UserId);
+      const user: any = await User.findById(UserId);
       const token = jwt.verify(
         req.body.token,
         process.env.SECRET_3 + user.password
@@ -16,8 +16,8 @@ router.post(
     } catch (err: any) {
       if (err.name === "TokenExpiredError") {
         return res.status(404).send({ name: err.name });
-      }  
-      return res.status(404).send(err);
+      }
+      return res.status(400).send("Invalid Token");
     }
     return res.send("OK");
   }

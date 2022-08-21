@@ -3,7 +3,7 @@ import { Router, Request, Response } from "express";
 import { User } from "../../models/user/User";
 import { generateTokens } from "../../auth";
 const router = Router();
-router.post("/login/", async (req: Request, res: Response) => {
+router.post("/login", async (req: Request, res: Response) => {
   const {email,password} = req.body
   if (!email || !password) {
     return res.status(404).send("Invalid Login");

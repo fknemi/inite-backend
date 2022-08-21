@@ -1,10 +1,8 @@
-// Reset Password User
 import { Router, Request, Response } from "express";
 import {
   generateEmailVerificationToken,
 } from "../../auth";
 import { sendEmail } from "../../main";
-import { User } from "../../models/user/User";
 const router = Router();
 router.post("/account/email/verify", async (req: Request, res: Response) => {
   const user = res.locals.user

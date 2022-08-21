@@ -50,7 +50,7 @@ export const updateInstagramUsers = cron.schedule("30 * * * *", async () => {
 
   const allUsers = await User.find().populate("following.instagramUser");
 
-  allUsers.forEach(async (user: { username: string; following: Object[] }) => {
+  allUsers.forEach(async (user: any) => {
     let usersNotNotified: {
       username: string;
       following: string[];
