@@ -18,7 +18,7 @@ router.post(
       if (err.name === "TokenExpiredError") {
         return res.status(404).send({ name: err.name });
       }
-      return res.status(404).send(err);
+      return res.status(404).send({ name: "Invalid Token" });
     }
     return res.send("OK");
   }

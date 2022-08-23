@@ -4,6 +4,8 @@ import { Router, Request, Response } from "express";
 import { User } from "../../models/user/User";
 import { uploadMedia, logEvent } from "../../main";
 import { generateTokens } from "../../auth";
+import { USER } from "../../common/types";
+import { Document } from "mongoose";
 
 const router = Router();
 router.post("/register/", async (req: Request, res: Response) => {
@@ -16,8 +18,12 @@ router.post("/register/", async (req: Request, res: Response) => {
   if (!req.body.email) {
     return res.status(206).send("Email is Required");
   }
-  if(!/^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(req.body.email)){
-    return res.status(400).send("Invalid Email Address")
+  if (
+    !/^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(
+      req.body.email
+    )
+  ) {
+    return res.status(400).send("Invalid Email Address");
   }
   if (!req.body.password) {
     return res.status(206).send("Password is Required");
@@ -35,7 +41,7 @@ router.post("/register/", async (req: Request, res: Response) => {
     `https://avatars.dicebear.com/api/initials/${req.body.username}.svg`,
     `Users/${req.body.username}/avatars`
   );
-  const user: any = new User({
+  const user = new User<USER>({
     ...req.body,
     avatar: avatar,
   });

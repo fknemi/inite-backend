@@ -14,8 +14,8 @@ router.post(
         `Media Deletion of ${req.body.username} was Unsuccessful`
       );
     }
-    return res.send(`Deleted Media of ${req.body.username}`);
+    return res.send("OK");
   }
 );
-
+  
 export { router };

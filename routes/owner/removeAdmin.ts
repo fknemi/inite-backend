@@ -19,8 +19,6 @@ router.post("/admin/remove/", async (req: Request, res: Response) => {
   await logEvent(
     `${user.name} has been removed from Admin by ${owner.userInfo.username}`
   );
-  return res.send(
-    `${user.name} has been removed from Admin by ${owner.userInfo.username}`
-  );
+  return res.send("OK");
 });
 export { router };

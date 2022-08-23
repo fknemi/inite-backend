@@ -27,10 +27,12 @@ router.post("/user/ban/", async (req: Request, res: Response) => {
     return res.status(404).send("Was Unable To Ban User");
   }
   await logEvent(
-    `${user.username} has been banned by ${admin.userInfo.username} ${req.body.banReason ? "Reason: " + req.body.banReason : "No Reason Provided"}`
+    `${user.username} has been banned by ${admin.userInfo.username} ${
+      req.body.banReason
+        ? "Reason: " + req.body.banReason
+        : "No Reason Provided"
+    }`
   );
-  return res.send(
-    `${user.username} has been banned by ${admin.userInfo.username}`
-  );
+  return res.send("OK");
 });
 export { router };

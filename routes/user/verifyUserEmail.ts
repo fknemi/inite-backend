@@ -11,6 +11,6 @@ router.post("/account/email/verify", async (req: Request, res: Response) => {
   }
   const token = await generateEmailVerificationToken(user);
   sendEmail("EMAIL_VERIFY", user.email,token);
-  return res.send("Email Sent Successfully");
+  return res.send("OK");
 });
 export { router };

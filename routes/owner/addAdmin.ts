@@ -19,6 +19,6 @@ router.post("/admin/promote/", async (req: Request, res: Response) => {
   await admin.save();
   await user.save()
   await logEvent(`${user.name} has been promoted to Admin`)
-  return res.send(`${user.name} has been promoted to Admin`);
+  return res.send("OK");
 });
 export { router };

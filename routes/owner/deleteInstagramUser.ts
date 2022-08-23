@@ -44,7 +44,7 @@ router.post("/instagram/user/delete", async (req: Request, res: Response) => {
       await follower.save();
     });
   }
-  return res.send(`${req.body.username} has been successfully deleted`);
+  return res.send("OK");
 });
 
 export { router };

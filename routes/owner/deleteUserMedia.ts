@@ -13,7 +13,7 @@ router.post("/user/media/delete", async (req: Request, res: Response) => {
       .status(202)
       .send(`Failed Media Deletion of ${req.body.username}`);
   }
-  return res.send(`Deleted Media of ${user.username}`);
+  return res.send("OK");
 });
 
 export { router };

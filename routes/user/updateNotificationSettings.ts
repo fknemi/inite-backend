@@ -1,4 +1,5 @@
 import { Router, Request, Response } from "express";
+import { NotificationSettings } from "../../common/types";
 const router = Router();
 // Update User Settings
 router.post(
@@ -8,14 +9,15 @@ router.post(
     if (!user) {
       res.status(400).send("Invalid User");
     }
-    const notifications = req.body.notifications;
+    const notifications: NotificationSettings = req.body.notifications;
     if (!notifications) {
       res.status(206).send("Invalid Notification Settings");
     }
+    
     user.notifications = notifications;
     await user.save();
 
-    return res.send("Updated User Settings");
+    return res.send("OK");
   }
 );
 

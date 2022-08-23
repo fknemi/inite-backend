@@ -47,10 +47,13 @@ router.post("/get/", async (req: Request, res: Response, context) => {
       name: user.name,
       username: user.username,
       email: user.email,
+      gender: user.gender,
+      avatar: user.avatar,
       emailVerified: user.emailVerified,
       instagramVerified: user.instagramVerified,
       followLimit: user.followLimit,
       notifications: user.notifications,
+      notifyEmail: user.notifyEmail,
       following: following,
       isBanned: user.isBanned,
     };

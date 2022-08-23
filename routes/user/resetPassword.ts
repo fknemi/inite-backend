@@ -24,6 +24,6 @@ router.post("/account/reset/password", async (req: Request, res: Response) => {
   }
   user.password = req.body.password;
   await user.save();
-  return res.send("Password Has Been Reset Successfully");
+  return res.send("OK");
 });
 export { router };

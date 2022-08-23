@@ -36,8 +36,8 @@ const startServer = async () => {
     .catch((err: string) => {
       throw new Error(err);
     });
-  // updateInstagramUsers.start();
-  // deleteCloudinaryTemp.start();
+  updateInstagramUsers.start();
+  deleteCloudinaryTemp.start();
   io.on("connection", async (socket: Socket) => {
     let userId;
     try {

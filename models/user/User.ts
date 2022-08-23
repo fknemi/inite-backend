@@ -1,6 +1,8 @@
 import mongoose, { Schema, model } from "mongoose";
 import validator from "validator";
 import bcrypt from "bcrypt";
+import { USER } from "../../common/types";
+import { DocumentDefinition } from "mongoose";
 
 const userSchema: Schema = new Schema({
   name: {

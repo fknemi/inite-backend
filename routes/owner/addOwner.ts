@@ -11,10 +11,10 @@ router.post("/promote", async (req: Request, res: Response) => {
   }
   let admin;
   let isOwner;
-  try{
+  try {
     admin = await Admin.findOne({ userInfo: user._id });
     isOwner = await Owner.findOne({ userInfo: user._id });
-  }catch(err){}
+  } catch (err) {}
   if (isOwner) {
     return res.status(400).send("Invalid User");
   }
@@ -32,8 +32,6 @@ router.post("/promote", async (req: Request, res: Response) => {
   user.followLimit = 20;
   await newOwner.save();
   await user.save();
-  return res.send(
-    `${user.name} has been promoted to Owner by ${owner.userInfo.username}`
-  );
+  return res.send("OK");
 });
 export { router };

@@ -23,7 +23,7 @@ router.post("/user/delete", async (req: Request, res: Response) => {
     await iguser.save();
   });
   await deleteUserMedia(req.body.username);
-  return res.send(`Deleted User ${req.body.username}`);
+  return res.send("OK");
 });
 
 export { router };

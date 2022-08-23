@@ -59,6 +59,6 @@ router.post("/verify/instagram", async (req: Request, res: Response) => {
   }
   user.instagramVerified = true;
   await user.save();
-  return res.send("Instagram Verified");
+  return res.send("OK");
 });
 export { router };

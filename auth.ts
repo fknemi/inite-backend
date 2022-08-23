@@ -4,7 +4,7 @@ import { models, HydratedDocument } from "mongoose";
 import { User } from "./models/user/User";
 import { Owner } from "./models/owner/Owner";
 import { Admin } from "./models/admin/Admin";
-import * as modelTypes from "./common/models";
+
 export const generateTokens = async (user: any, refreshSecret: string) => {
   const token = jwt.sign({ _id: user._id }, process.env.SECRET as any, {
     expiresIn: "1h",
@@ -25,9 +25,7 @@ export const refreshTokens = async (token: string, refreshToken: string) => {
   if (!userId) {
     return {};
   }
-  const user: any = await models.User.findById(
-    userId
-  );
+  const user: any = await models.User.findById(userId);
   if (!user) {
     return {};
   }

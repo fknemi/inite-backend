@@ -1,7 +1,7 @@
 // Ban Instagram User
 import { Router, Request, Response } from "express";
 import { instagramUser } from "../../models/ig/instagramUser";
-import { logEvent } from '../../main';
+import { logEvent } from "../../main";
 const router = Router();
 router.post("/instagram/user/unban", async (req: Request, res: Response) => {
   const admin = res.locals.admin;
@@ -17,9 +17,9 @@ router.post("/instagram/user/unban", async (req: Request, res: Response) => {
   if (user.isBanned) {
     return res.send("Failed To Unban User");
   }
-  await logEvent(`${req.body.username} has been unbanned by ${admin.userInfo.username}`)
-  return res.send(
+  await logEvent(
     `${req.body.username} has been unbanned by ${admin.userInfo.username}`
   );
+  return res.send("OK");
 });
 export { router };

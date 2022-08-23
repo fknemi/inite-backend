@@ -1,5 +1,6 @@
 import mongoose, { Schema, model } from "mongoose";
-const adminSchema: Schema = new Schema({
+import { ADMIN } from "../../common/types";
+const adminSchema: Schema<ADMIN> = new Schema({
   userInfo: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   isAdmin: {
     type: Boolean,
