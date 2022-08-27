@@ -9,6 +9,7 @@ router.post("/instagram/get/users", async (req: Request, res: Response) => {
     name: string;
     avatar: string;
     timestamp: string;
+    isBanned: boolean;
   }[] = [];
   if (!users) {
     return res.status(404).send("Users Not Found");
@@ -16,10 +17,15 @@ router.post("/instagram/get/users", async (req: Request, res: Response) => {
   users.forEach((user: any) => {
     let avatar: string = "";
 
-    for (let i = 0; i <= user.avatars.length - 1; i++) {
-      if (user.avatars[i].recent) {
-        avatar = user.avatars[i].url;
+    if (!user.recentlyAdded) {
+      for (let i = 0; i <= user.avatars.length - 1; i++) {
+        if (user.avatars[i].recent) {
+          avatar = user.avatars[i].url;
+          break;
+        }
       }
+    } else {
+      avatar = user.avatars[0].url;
     }
 
     usersData.push({
@@ -27,6 +33,7 @@ router.post("/instagram/get/users", async (req: Request, res: Response) => {
       name: user.name,
       avatar: avatar,
       timestamp: user.timestamp,
+      isBanned: user.isBanned,
     });
   });
 

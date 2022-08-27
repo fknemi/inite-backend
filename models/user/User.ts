@@ -1,8 +1,6 @@
 import mongoose, { Schema, model } from "mongoose";
 import validator from "validator";
 import bcrypt from "bcrypt";
-import { USER } from "../../common/types";
-import { DocumentDefinition } from "mongoose";
 
 const userSchema: Schema = new Schema({
   name: {
@@ -19,6 +17,7 @@ const userSchema: Schema = new Schema({
     type: String,
     required: true,
     trim: true,
+    unique: true,
   },
   email: {
     type: String,
@@ -166,6 +165,16 @@ const userSchema: Schema = new Schema({
   timestamp: {
     type: String,
     default: new Date().getTime(),
+  },
+  roles: {
+    isAdmin: {
+      type: Boolean,
+      default: false,
+    },
+    isOwner: {
+      type: Boolean,
+      default: false,
+    },
   },
 });
 

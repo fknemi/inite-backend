@@ -1,6 +1,7 @@
 import { Router, Request, Response } from "express";
 import { deleteUserMedia } from "../../main";
 import { User } from "../../models/user/User";
+import { DEFAULT_AVATAR_1 } from '../../common/config';
 const router = Router();
 router.post("/user/media/delete", async (req: Request, res: Response) => {
   const user = await User.findOne({ username: req.body.username });
@@ -13,6 +14,8 @@ router.post("/user/media/delete", async (req: Request, res: Response) => {
       .status(202)
       .send(`Failed Media Deletion of ${req.body.username}`);
   }
+  user.avatar = DEFAULT_AVATAR_1
+  await user.save()
   return res.send("OK");
 });
 

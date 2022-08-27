@@ -13,7 +13,6 @@ router.post("/report/", async (req: Request, res: Response) => {
     username: req.body.accountReported.username,
   });
 
-
   const report = new Report({
     userInfo: user._id,
     reason: req.body.reason,

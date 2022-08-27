@@ -5,6 +5,11 @@ import { User } from "../../models/user/User";
 const router = Router();
 router.post("/user/delete", async (req: Request, res: Response) => {
   let iguser;
+  let owner = await res.locals.owner;
+
+  if (req.body.username === owner.userInfo.username) {
+    return res.status(400).send("You cannot delete current logged in User");
+  }
   const user = await User.findOneAndDelete({ username: req.body.username });
   if (!user) {
     return res.status(404).send("User Not Found");
@@ -22,7 +27,12 @@ router.post("/user/delete", async (req: Request, res: Response) => {
     }
     await iguser.save();
   });
-  await deleteUserMedia(req.body.username);
+  if (req.body.deleteMedia) {
+    const isMediaDeleted = await deleteUserMedia(req.body.username);
+    if (!isMediaDeleted) {
+      return res.send(`MEDIA DELETION FAILED`);
+    }
+  }
   return res.send("OK");
 });
 

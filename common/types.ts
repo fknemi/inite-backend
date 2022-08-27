@@ -70,6 +70,7 @@ export interface NotificationSettings {
   newAccountPrivacyChange: boolean;
 }
 export interface USER {
+  avatar: string;
   name: string;
   password: string;
   username: string;
@@ -132,6 +133,7 @@ export interface ADMIN {
 export interface OWNER {
   userInfo: USER;
   isAdmin: boolean;
+  isOwner: boolean;
   ownerPermissions: {
     changeSelfUsername: boolean;
     deleteUser: boolean;

@@ -6,6 +6,7 @@ import { uploadMedia, logEvent } from "../../main";
 import { generateTokens } from "../../auth";
 import { USER } from "../../common/types";
 import { Document } from "mongoose";
+import { DEFAULT_AVATAR_1 } from '../../common/config';
 
 const router = Router();
 router.post("/register/", async (req: Request, res: Response) => {
@@ -43,7 +44,7 @@ router.post("/register/", async (req: Request, res: Response) => {
   );
   const user = new User<USER>({
     ...req.body,
-    avatar: avatar,
+    avatar: avatar || DEFAULT_AVATAR_1,
   });
   await user.save();
   const newTokens = await generateTokens(

@@ -9,7 +9,7 @@ import * as http from "http";
 import { Server, Socket } from "socket.io";
 import * as jwt from "jsonwebtoken";
 import { User } from "./models/user/User";
-import { db, findUserInDB } from "./main";
+import { db, findUserInDB, createDefaultUser } from "./main";
 
 const app = express();
 app.use(express.json());
@@ -17,8 +17,8 @@ app.use(cors());
 app.use(checkUser);
 app.use("/user", router);
 app.use("/admin", checkAdmin);
-app.use("/admin", admin);
 app.use("/owner", checkOwner);
+app.use("/admin", admin);
 app.use("/owner", owner);
 app.use("/instagram", instagram);
 app.use(router);
@@ -83,6 +83,9 @@ const startServer = async () => {
   server.listen(PORT, () => {
     console.log(`Server is Listening on http://localhost:${PORT}...`);
   });
+  if (process.env.CREATE_DEFAULT_USER) {
+    createDefaultUser();
+  }
 };
 
 startServer();

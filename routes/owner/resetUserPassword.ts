@@ -7,7 +7,11 @@ router.post(
   "/user/account/reset/password",
   async (req: Request, res: Response) => {
     const owner = res.locals.owner;
-    const user = await User.findOne({ email: req.body.email });
+    let query: any = { username: req.body.username };
+    if (req.body.email) {
+      query = { ...query, email: req.body.email };
+    }
+    const user = await User.findOne(query);
     if (!user) {
       return res.status(404).send("User Not Found");
     }

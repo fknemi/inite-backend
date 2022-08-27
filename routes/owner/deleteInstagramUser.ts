@@ -16,7 +16,7 @@ router.post("/instagram/user/delete", async (req: Request, res: Response) => {
     const isMediaDeleted = await deleteInstagramUserMedia(req.body.username);
     if (!isMediaDeleted) {
       return res.send(
-        `Media Deletion of ${req.body.username} was Unsuccessful`
+        `MEDIA DELETION FAILED`
       );
     }
   }

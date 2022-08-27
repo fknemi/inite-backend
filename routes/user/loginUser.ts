@@ -4,11 +4,13 @@ import { User } from "../../models/user/User";
 import { generateTokens } from "../../auth";
 const router = Router();
 router.post("/login", async (req: Request, res: Response) => {
-  const {email,password} = req.body
+  const { email, password } = req.body;
   if (!email || !password) {
     return res.status(404).send("Invalid Login");
   }
-  const user: any = await User.findOne({ email: email }).populate("following.instagramUser")
+  const user: any = await User.findOne({ email: email }).populate(
+    "following.instagramUser"
+  );
   if (!user) {
     return res.status(404).send("Invalid Login");
   }
@@ -16,7 +18,9 @@ router.post("/login", async (req: Request, res: Response) => {
   let avatar: string;
   user.following.forEach((data: any) => {
     const iguser = data.instagramUser;
-    if(iguser.isBanned){return;}
+    if (iguser.isBanned) {
+      return;
+    }
     if (iguser.avatars.length < 1) {
       for (let i = 0; i <= iguser.avatars.length - 1; i++) {
         if (iguser.avatars[i].recent) {

@@ -2,21 +2,12 @@
 import { Router, Request, Response } from "express";
 import { User } from "../../models/user/User";
 import { generateTokens } from "../../auth";
+import { ADMIN, OWNER } from "../../common/types";
 const router = Router();
 router.post("/login/", async (req: Request, res: Response) => {
-  let admin: {
-    userInfo: {
-      name: string;
-      username: string;
-      avatar: string;
-      isBanned: boolean;
-      emailVerified: boolean;
-    };
-    isAdmin: boolean;
-    adminPermissions: Object;
-  } = res.locals.admin;
+  let admin: ADMIN = res.locals.admin;
   const user = res.locals.user;
-  const owner = res.locals.owner;
+  const owner: OWNER = res.locals.owner;
   let permissions;
   let isOwner;
   if (owner) {
@@ -25,8 +16,8 @@ router.post("/login/", async (req: Request, res: Response) => {
   } else {
     permissions = admin.adminPermissions;
   }
-  const username = req.body.username;
-  const password = req.body.password;
+  const username: string = req.body.username;
+  const password: string = req.body.password;
 
   if (!username || !password) {
     return res.status(404).send("Invalid Login");

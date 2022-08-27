@@ -4,6 +4,11 @@ import { Log } from "./models/log/Log";
 const shortUniqueId = require("short-unique-id");
 const { getUserByUsername } = require("instagram-stories");
 import * as types from "./common/types";
+import { User } from "./models/user/User";
+import { DEFAULT_AVATAR_1 } from "./common/config";
+import { Owner } from "./models/owner/Owner";
+import { Admin } from "./models/admin/Admin";
+import { MongooseError } from "mongoose";
 const uid = new shortUniqueId();
 cloudinary.v2.config({
   cloud_name: process.env.CLOUD_NAME,
@@ -148,7 +153,7 @@ export const updateInstagramUser = async (currentUser: any, user: any) => {
     followingCount: undefined,
     postsCount: undefined,
     timestamp: new Date().getTime(),
-    id: uid.stamp(32)
+    id: uid.stamp(32),
   };
   let is_diff;
   if (avatar && currentUser.avatar) {
@@ -264,4 +269,39 @@ export const findUserInDB = async (username: string) => {
       return resolve(docs);
     });
   });
+};
+
+export const createDefaultUser = async () => {
+  const DEFAULT_USER = new User({
+    name: "Owner",
+    username: "owner",
+    password: "1234",
+    email: process.env.DEFAULT_USER_OWNER_EMAIL,
+    gender: "_",
+    avatar: DEFAULT_AVATAR_1,
+    emailVerified: false,
+    roles: {
+      isAdmin: true,
+      isOwner: true,
+    },
+  });
+  const DEFAULT_ADMIN = new Admin({
+    userInfo: DEFAULT_USER._id,
+    isAdmin: true,
+  });
+  const DEFAULT_OWNER = new Owner({
+    userInfo: DEFAULT_USER._id,
+    isAdmin: true,
+  });
+
+  try {
+    await DEFAULT_USER.save();
+    await DEFAULT_ADMIN.save();
+    await DEFAULT_OWNER.save();
+    console.log(`[\x1b[36mINFO\x1b[0m]`, "CREATED DEFAULT USER");
+  } catch (err) {
+    if ((err as { code: number }).code === 11000) {
+      console.log(`[\x1b[31mERROR\x1b[0m]`, "DEFAULT USER ALREADY EXISTS");
+    }
+  }
 };
