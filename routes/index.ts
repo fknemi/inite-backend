@@ -37,7 +37,9 @@ import { router as getUserDetails } from "./owner/getUserDetails";
 import { router as getAllUsers } from "./admin/getAllUsers";
 import { router as getAllInstagramUsers } from "./admin/getAllInstagramUsers";
 import { router as updateNotificationSettings } from "./user/updateNotificationSettings";
-// import { router as addOwner } from "./owner/addOwner";
+// import {router as addOwner} from "./owner/addOwner";
+import { router as deleteReports } from "./owner/deleteReports";
+import { router as getReadReports } from "./owner/getReadReports";
 import { router as verifyUserInstagram } from "./user/verifyUserInstagram";
 import { router as unlinkUserInstagram } from "./user/unlinkUserInstagram";
 const router = Router();
@@ -80,6 +82,8 @@ owner.use(resetUserPassword);
 owner.use(getLogs);
 owner.use(getInstagramUserDetails);
 owner.use(getUserDetails);
+owner.use(getReadReports);
+owner.use(deleteReports);
 // owner.use(addOwner);
 
 // Admin

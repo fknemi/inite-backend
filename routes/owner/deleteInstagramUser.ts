@@ -4,7 +4,7 @@ import { instagramUser } from "../../models/ig/instagramUser";
 import { deleteInstagramUserMedia } from "../../main";
 import { User } from "../../models/user/User";
 const router = Router();
-router.post("/instagram/user/delete", async (req: Request, res: Response) => {
+router.put("/instagram/user/delete", async (req: Request, res: Response) => {
   const owner = res.locals.owner;
   const user = await instagramUser.findOneAndDelete({
     username: req.body.username,

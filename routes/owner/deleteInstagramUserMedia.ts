@@ -2,7 +2,7 @@ import { Router, Request, Response } from "express";
 import { deleteInstagramUserMedia } from "../../main";
 import { instagramUser } from "../../models/ig/instagramUser";
 const router = Router();
-router.post(
+router.put(
   "/instagram/user/media/delete",
   async (req: Request, res: Response) => {
     try {

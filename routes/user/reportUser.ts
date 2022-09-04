@@ -4,7 +4,7 @@ import { instagramUser } from "../../models/ig/instagramUser";
 import { Report } from "../../models/report/Report";
 const router = Router();
 // Report User
-router.post("/report/", async (req: Request, res: Response) => {
+router.put("/report/", async (req: Request, res: Response) => {
   const user = res.locals.user;
   if (!user) {
     return res.status(200).send("Invalid User");

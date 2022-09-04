@@ -2,7 +2,7 @@ import { Router, Request, Response } from "express";
 import { instagramUser } from "../../models/ig/instagramUser";
 const router = Router();
 // Follow Instagram User
-router.post("/instagram/unfollow", async (req: Request, res: Response) => {
+router.put("/instagram/unfollow", async (req: Request, res: Response) => {
   const user = res.locals.user;
   if (!user) {
     return res.status(404).send("Invalid User");

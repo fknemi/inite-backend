@@ -2,7 +2,7 @@
 import { Router, Request, Response } from "express";
 import { instagramUser } from "../../models/ig/instagramUser";
 const router = Router();
-router.post("/instagram/get/users", async (req: Request, res: Response) => {
+router.get("/instagram/get/users", async (req: Request, res: Response) => {
   const users = await instagramUser.find();
   const usersData: {
     username: string;

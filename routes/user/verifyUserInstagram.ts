@@ -5,7 +5,7 @@ import { instagramUser } from "../../models/ig/instagramUser";
 import { User } from "../../models/user/User";
 const { getUserByUsername } = require("instagram-stories");
 const router = Router();
-router.post("/verify/instagram", async (req: Request, res: Response) => {
+router.put("/verify/instagram", async (req: Request, res: Response) => {
   const user = res.locals.user;
   if (!user) {
     return res.status(400).send("Invalid User");

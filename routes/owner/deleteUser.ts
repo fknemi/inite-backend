@@ -3,7 +3,7 @@ import { deleteUserMedia } from "../../main";
 import { instagramUser } from "../../models/ig/instagramUser";
 import { User } from "../../models/user/User";
 const router = Router();
-router.post("/user/delete", async (req: Request, res: Response) => {
+router.put("/user/delete", async (req: Request, res: Response) => {
   let iguser;
   let owner = await res.locals.owner;
 

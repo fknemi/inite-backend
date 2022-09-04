@@ -5,7 +5,7 @@ import { Admin } from "../../models/admin/Admin";
 import { checkOwner } from "../../permissions";
 import { logEvent } from "../../main";
 const router = Router();
-router.post("/promote/admin/", async (req: Request, res: Response) => {
+router.put("/promote/admin/", async (req: Request, res: Response) => {
   const owner: any = res.locals.owner;
   if (!req.body.email || !req.body.username) {
     return res.status(206).send("Invalid Request");

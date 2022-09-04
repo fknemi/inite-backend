@@ -2,7 +2,7 @@
 import { Router, Request, Response } from "express";
 import { Log } from "../../models/log/Log";
 const router = Router();
-router.post("/get/logs", async (req: Request, res: Response) => {
+router.get("/get/logs", async (req: Request, res: Response) => {
   const allLogs = await Log.find()
   const logs: Object[] = [];
   allLogs.forEach((log) => {

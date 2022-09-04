@@ -3,7 +3,7 @@ import cloudinary from "cloudinary";
 import { Log } from "./models/log/Log";
 const shortUniqueId = require("short-unique-id");
 const { getUserByUsername } = require("instagram-stories");
-import * as types from "./common/types";
+import { NOTIFICATION_CHANGED_USER } from "./common/types";
 import { User } from "./models/user/User";
 import { DEFAULT_AVATAR_1 } from "./common/config";
 import { Owner } from "./models/owner/Owner";
@@ -21,17 +21,20 @@ export let db = new Datastore({
   autoload: true,
   unique: true,
 });
-// ---------------------- Image Comparison -----------------------------------
+// TODO ---------------------- UPDATE Image Comparison -----------------------------------
 export const is_same = async (img1: string, img2: string) => {
-  return new Promise((resolve, reject) => {
-    return lsp(img1, img2, (error: string, { equal }: any) => {
-      if (error) {
-        return reject(error);
-      }
-      return resolve(equal);
-    });
-  });
+  return true;
 };
+// export const is_same = async (img1: string, img2: string) => {
+//   return new Promise((resolve, reject) => {
+//     return lsp(img1, img2, (error: string, { equal }: any) => {
+//       if (error) {
+//         return reject(error);
+//       }
+//       return resolve(equal);
+//     });
+//   });
+// };
 
 // ---------------------- Cloudinary Upload -----------------------------------
 
@@ -124,7 +127,7 @@ export const generatePassword = () => {
 
 export const updateInstagramUser = async (currentUser: any, user: any) => {
   let biography;
-  let avatar;
+  let avatar: any;
   if (!user.recentlyAdded) {
     for (let i = 0; i <= user.biography.length - 1; i++) {
       if (user.biography[i].recent) {
@@ -143,7 +146,8 @@ export const updateInstagramUser = async (currentUser: any, user: any) => {
     avatar = user.avatars[0].url;
   }
 
-  let changedUser: types.changedUser = {
+  let changedUser: NOTIFICATION_CHANGED_USER = {
+    type: "CHANGED_USER",
     username: user.username,
     name: undefined,
     biography: undefined,
@@ -164,11 +168,24 @@ export const updateInstagramUser = async (currentUser: any, user: any) => {
     is_diff = false;
   }
   if (!is_diff) {
+    avatar = await uploadMedia(
+      currentUser.avatar,
+      `InstagramUsers/${user.username}/avatars`
+    );
     changedUser.avatar = {
       didChange: true,
-      oldValue: currentUser.avatar,
-      newValue: user.avatar,
+      oldValue: user.avatar,
+      newValue: avatar,
     };
+
+    for (let i = 0; i <= user.avatars.length - 1; i++) {
+      if (user.avatars[i].recent) {
+        user.avatars[i].recent = false;
+      }
+    }
+    user.avatars.push({
+      url: avatar,
+    });
   }
   if (user.username === currentUser.username) {
     if (user.name !== currentUser.name) {
@@ -177,6 +194,7 @@ export const updateInstagramUser = async (currentUser: any, user: any) => {
         oldValue: currentUser.name,
         newValue: user.name,
       };
+      user.name = currentUser.name;
     }
     if (biography !== currentUser.biography) {
       changedUser.biography = {
@@ -184,6 +202,15 @@ export const updateInstagramUser = async (currentUser: any, user: any) => {
         oldValue: currentUser.biography,
         newValue: user.biography,
       };
+
+      for (let i = 0; i <= user.biography.length - 1; i++) {
+        if (user.biography[i].recent) {
+          user.biography[i].recent = false;
+        }
+      }
+      user.biography.push({
+        text: currentUser.biography,
+      });
     }
     if (user.isPrivate !== currentUser.isPrivate) {
       changedUser.isPrivate = {
@@ -191,6 +218,7 @@ export const updateInstagramUser = async (currentUser: any, user: any) => {
         oldValue: currentUser.isPrivate,
         newValue: user.isPrivate,
       };
+      user.isPrivate = currentUser.isPrivate;
     }
     if (user.followedByCount !== currentUser.followedByCount) {
       changedUser.followedByCount = {
@@ -198,6 +226,7 @@ export const updateInstagramUser = async (currentUser: any, user: any) => {
         oldValue: currentUser.followedByCount,
         newValue: user.followedByCount,
       };
+      user.followedByCount = currentUser.followedByCount;
     }
     if (user.followingCount !== currentUser.followingCount) {
       changedUser.followingCount = {
@@ -205,6 +234,7 @@ export const updateInstagramUser = async (currentUser: any, user: any) => {
         oldValue: currentUser.followingCount,
         newValue: user.followingCount,
       };
+      user.followingCount = currentUser.followingCount;
     }
     if (user.postsCount !== currentUser.postsCount) {
       changedUser.postsCount = {
@@ -212,9 +242,22 @@ export const updateInstagramUser = async (currentUser: any, user: any) => {
         oldValue: currentUser.postsCount,
         newValue: user.postsCount,
       };
+      user.postsCount = currentUser.postsCount;
     }
   }
-  return changedUser;
+  if (
+    changedUser.name ||
+    changedUser.biography ||
+    changedUser.avatar ||
+    changedUser.isPrivate !== undefined ||
+    changedUser.followedByCount ||
+    changedUser.followingCount ||
+    changedUser.postsCount
+  ) {
+    await user.save();
+    return changedUser;
+  }
+  return {};
 };
 
 export const getAllInstagramUsers = async (users: any) => {

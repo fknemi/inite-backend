@@ -2,18 +2,17 @@ import { io } from "../index";
 import {
   db,
   getAllInstagramUsers,
-  sendBulkEmails,
   updateInstagramUser,
 } from "../main";
 import { instagramUser } from "../models/ig/instagramUser";
 import { User } from "../models/user/User";
 import * as jwt from "jsonwebtoken";
-import * as types from "../common/types";
 import { findUserInDB, getAllUsersInDB } from "../main";
 import cloudinary from "cloudinary";
 import cron from "node-cron";
 const shortUniqueId = require("short-unique-id");
 const uid = new shortUniqueId();
+
 export const updateInstagramUsers = cron.schedule("30 * * * *", async () => {
   const users: any = await instagramUser.find().populate("followedBy.user");
   const usersCurrentData: any = await getAllInstagramUsers(users);
@@ -25,11 +24,13 @@ export const updateInstagramUsers = cron.schedule("30 * * * *", async () => {
         usersCurrentData[i],
         users[i]
       );
-      if (changedUser) {
+      if (Object.keys(changedUser).length > 0) {
         allUsersChanges.push(changedUser);
       }
     }
   }
+
+
   const userEmails: { following: string; email: string }[] = [];
   users.forEach(
     (user: {
@@ -75,6 +76,12 @@ export const updateInstagramUsers = cron.schedule("30 * * * *", async () => {
         data.push(followedUserChanges);
       }
     });
+    if (!data.length) {
+      return;
+    }
+    console.log(data);
+    console.log(data.length);
+    
     usersNotNotified.push({
       username: user.username,
       following: following,
@@ -96,7 +103,8 @@ export const updateInstagramUsers = cron.schedule("30 * * * *", async () => {
         { $set: { data: [...data, ...findUser.data] } }
       );
     }
-  });
+  }
+  );
 
   const sockets: any[] = await io.fetchSockets();
   sockets.forEach(async (socket: any) => {
@@ -110,7 +118,8 @@ export const updateInstagramUsers = cron.schedule("30 * * * *", async () => {
         "following.instagramUser"
       );
       const getUser: any = await findUserInDB(user.username);
-      socket.emit("newChangesAlert", getUser.data);
+
+      socket.emit("notifications", getUser.data);
       socket.on("status", (status: string) => {
         if (parseInt(status) === 200) {
           db.remove(
@@ -124,6 +133,8 @@ export const updateInstagramUsers = cron.schedule("30 * * * *", async () => {
               }
             }
           );
+        } else {
+          socket.emit("notifications", getUser.data);
         }
       });
     } catch (err) {
@@ -133,6 +144,7 @@ export const updateInstagramUsers = cron.schedule("30 * * * *", async () => {
   // To Be Implemented
   // sendBulkEmails(userEmails, allUsersChanges);
   console.log("Done");
+  
 });
 
 export const deleteCloudinaryTemp = cron.schedule("0 0 * * 0", async () => {

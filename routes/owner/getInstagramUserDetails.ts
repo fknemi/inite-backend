@@ -4,7 +4,7 @@ import { Router, Request, Response } from "express";
 import { uploadMedia } from "../../main";
 const { getUserByUsername } = require("instagram-stories");
 const router = Router();
-router.post("/instagram/user/details", async (req: Request, res: Response) => {
+router.get("/instagram/user/details", async (req: Request, res: Response) => {
   const username = req.body.username;
   if (!username) {
     return res.status(404).send("Invalid Username");

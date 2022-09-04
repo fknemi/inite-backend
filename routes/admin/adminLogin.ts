@@ -1,10 +1,12 @@
-// Update User
+// Admin Login
 import { Router, Request, Response } from "express";
 import { User } from "../../models/user/User";
 import { generateTokens } from "../../auth";
 import { ADMIN, OWNER } from "../../common/types";
 const router = Router();
 router.post("/login/", async (req: Request, res: Response) => {
+  console.log("HELLO WORLD");
+  
   let admin: ADMIN = res.locals.admin;
   const user = res.locals.user;
   const owner: OWNER = res.locals.owner;
@@ -27,7 +29,9 @@ router.post("/login/", async (req: Request, res: Response) => {
   if (!checkPassword) {
     return res.status(404).send("Invalid Login");
   }
-
+  console.log('====================================');
+  console.log(username,user.username);
+  console.log('====================================');
   if (username !== user.username) {
     return res.status(400).send("Invalid User");
   }

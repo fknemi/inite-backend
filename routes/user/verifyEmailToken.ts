@@ -3,7 +3,7 @@ import * as jwt from "jsonwebtoken";
 import { User } from "../../models/user/User";
 const router = Router();
 
-router.post(
+router.put(
   "/account/email/verify/token",
   async (req: Request, res: Response) => {
     try {

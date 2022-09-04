@@ -6,7 +6,7 @@ import { generatePasswordResetToken } from "../../auth";
 import { sendEmail } from "../../main";
 const router = Router();
 
-router.post("/account/forgot/password", async (req: Request, res: Response) => {
+router.put("/account/forgot/password", async (req: Request, res: Response) => {
   const user = await User.findOne({ email: req.body.email });
   if (!user) {
     return res.send("OK");

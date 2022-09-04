@@ -1,7 +1,7 @@
 // Get User Data
 import { Router, Request, Response } from "express";
 const router = Router();
-router.post("/get/", async (req: Request, res: Response, context) => {
+router.get("", async (req: Request, res: Response, context) => {
   let user: any;
   try {
     user = await res.locals.user.populate("following.instagramUser");

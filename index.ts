@@ -4,12 +4,17 @@ import cors from "cors";
 import mongoose from "mongoose";
 import { admin, instagram, owner, router } from "./routes/index";
 import { checkUser, checkAdmin, checkOwner } from "./auth";
-import { updateInstagramUsers, deleteCloudinaryTemp } from "./cron-jobs/jobs";
+import {
+  updateInstagramUsers,
+  deleteCloudinaryTemp,
+} from "./cron-jobs/jobs";
 import * as http from "http";
 import { Server, Socket } from "socket.io";
 import * as jwt from "jsonwebtoken";
 import { User } from "./models/user/User";
 import { db, findUserInDB, createDefaultUser } from "./main";
+import { onConnect, onDeleteReport } from "./socket/socket";
+import { socket_checkUser, socket_checkOwner } from "./socket/auth";
 
 const app = express();
 app.use(express.json());
@@ -26,7 +31,11 @@ app.use(router);
 const server = http.createServer(app);
 
 export const following: string[] = [];
-export const io = new Server(server);
+export const io = new Server(server, {
+  cors: {
+    origin: "*",
+  },
+});
 
 const startServer = async () => {
   const PORT = 5000;
@@ -38,48 +47,9 @@ const startServer = async () => {
     });
   updateInstagramUsers.start();
   deleteCloudinaryTemp.start();
-  io.on("connection", async (socket: Socket) => {
-    let userId;
-    try {
-      userId = jwt.verify(
-        socket.handshake.auth["x-token"],
-        process.env.SECRET as string
-      );
-    } catch (err) {
-      socket.emit("error", "Authentication Error");
-      return;
-    }
-    const user: any = await User.findById(userId).populate(
-      "following.instagramUser"
-    );
-    let getUser: any;
-    try {
-      getUser = await findUserInDB(user.username);
-    } catch (err) {
-      console.log(err);
-    }
-    if (getUser) {
-      socket.emit("notifications", getUser.data);
-      socket.on("status", (status: string) => {
-        if (parseInt(status) === 200) {
-          db.remove(
-            { username: user.username },
-            {},
-            (err: any, numRemoved: any) => {
-              if (err) {
-                console.log(err);
-              } else {
-                console.log("Removed");
-              }
-            }
-          );
-        }
-      });
-    }
-    console.log("User Connected");
+  io.use(socket_checkUser);
+  io.on("connection", onConnect);
 
-    socket.on("disconnect", () => console.log("user disconnected"));
-  });
   server.listen(PORT, () => {
     console.log(`Server is Listening on http://localhost:${PORT}...`);
   });

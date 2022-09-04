@@ -4,7 +4,7 @@ import {
 } from "../../auth";
 import { sendEmail } from "../../main";
 const router = Router();
-router.post("/account/email/verify", async (req: Request, res: Response) => {
+router.put("/account/email/verify", async (req: Request, res: Response) => {
   const user = res.locals.user
   if (!user) {
     return res.status(404).send("Invalid User");

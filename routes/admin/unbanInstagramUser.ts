@@ -3,7 +3,7 @@ import { Router, Request, Response } from "express";
 import { instagramUser } from "../../models/ig/instagramUser";
 import { logEvent } from "../../main";
 const router = Router();
-router.post("/instagram/user/unban", async (req: Request, res: Response) => {
+router.put("/instagram/user/unban", async (req: Request, res: Response) => {
   const admin = res.locals.admin;
   const user = await instagramUser.findOne({ username: req.body.username }); // nosonar
   if (!user) {

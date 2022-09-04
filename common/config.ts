@@ -1,1 +1,1 @@
-export const DEFAULT_AVATAR_1 = "https://res.cloudinary.com/dig6ih2ni/image/upload/v1661331621/Inite/Default%20Avatars/Inite-Default-Avatar-1.svg"
+export const DEFAULT_AVATAR_1 = process.env.DEFAULT_AVATAR_1

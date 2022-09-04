@@ -5,7 +5,7 @@ import { Owner } from "../../models/owner/Owner";
 import { User } from "../../models/user/User";
 const { getUserByUsername } = require("instagram-stories");
 const router = Router();
-router.post("/get/users", async (req: Request, res: Response) => {
+router.get("/get/users", async (req: Request, res: Response) => {
   const users = await User.find();
   const usersData: {
     username: string;

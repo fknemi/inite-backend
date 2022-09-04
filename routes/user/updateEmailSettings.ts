@@ -1,7 +1,7 @@
 import { Router, Request, Response } from "express";
 const router = Router();
 
-router.post("/update/email/settings", async (req: Request, res: Response) => {
+router.put("/update/email/settings", async (req: Request, res: Response) => {
   const user = res.locals.user;
   let notifyEmail = req.body.notifyEmail;
   if (!user) {

@@ -4,7 +4,7 @@ import { User } from "../../models/user/User";
 import { Admin } from "../../models/admin/Admin";
 import { logEvent } from "../../main";
 const router = Router();
-router.post("/user/unban/", async (req: Request, res: Response) => {
+router.put("/user/unban/", async (req: Request, res: Response) => {
   const admin = res.locals.admin;
   const user = await User.findOne({ username: req.body.username });
   if (!user) {

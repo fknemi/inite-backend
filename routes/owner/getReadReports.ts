@@ -2,11 +2,12 @@
 import { Router, Request, Response } from "express";
 import { Report } from "../../models/report/Report";
 const router = Router();
-router.get("/get/reports", async (req: Request, res: Response) => {
+router.get("/get/read/reports", async (req: Request, res: Response) => {
   const allReports = await Report.find().populate("userInfo accountReported");
   const reports: Object[] = [];
+
   allReports.forEach((report) => {
-    if (!report.readStatus) {
+    if (report.readStatus) {
       try {
         reports.push({
           _id: report._id,

@@ -1,4 +1,5 @@
-export type changedUser = {
+export interface NOTIFICATION_CHANGED_USER {
+  type: string;
   username: string;
   name:
     | {
@@ -55,7 +56,7 @@ export type changedUser = {
 
 export type getUser = Promise<{
   username: string;
-  data: changedUser[];
+  data: NOTIFICATION_CHANGED_USER[];
   following: string[];
 }>;
 

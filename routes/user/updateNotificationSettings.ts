@@ -2,7 +2,7 @@ import { Router, Request, Response } from "express";
 import { NotificationSettings } from "../../common/types";
 const router = Router();
 // Update User Settings
-router.post(
+router.put(
   "/update/settings/notifications",
   async (req: Request, res: Response) => {
     const user = res.locals.user;

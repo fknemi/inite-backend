@@ -4,7 +4,7 @@ import { User } from "../../models/user/User";
 import { Admin } from "../../models/admin/Admin";
 import { logEvent } from "../../main";
 const router = Router();
-router.post("remove/admin/", async (req: Request, res: Response) => {
+router.put("remove/admin/", async (req: Request, res: Response) => {
   const owner: any = res.locals.owner;
   if (!req.body.email || !req.body.username) {
     return res.status(206).send("Invalid Request");
