@@ -1,14 +1,51 @@
-const lsp = require("looks-same-plus");
-import cloudinary from "cloudinary";
+import cloudinary, {
+  UploadApiErrorResponse,
+  UploadApiResponse,
+} from "cloudinary";
 import { Log } from "./models/log/Log";
 const shortUniqueId = require("short-unique-id");
 const { getUserByUsername } = require("instagram-stories");
-import { NOTIFICATION_CHANGED_USER } from "./common/types";
+import { NOTIFICATION_CHANGED_USER } from "./@types/types";
 import { User } from "./models/user/User";
 import { DEFAULT_AVATAR_1 } from "./common/config";
 import { Owner } from "./models/owner/Owner";
 import { Admin } from "./models/admin/Admin";
-import { MongooseError } from "mongoose";
+import pixelMatch from "pixelmatch";
+import pixels from "image-pixels";
+import { Document } from "mongoose";
+import winston, { createLogger } from "winston";
+
+let colorRegex = /\\u001b\[\d+m/g,
+  doubleQuotesRegex = /"/g;
+
+const combine = winston.format.combine(
+  winston.format.timestamp(),
+  winston.format.colorize({
+    level: true,
+    colors: {
+      error: "red",
+      warn: "yellow",
+      info: "green",
+      debug: "blue",
+      silly: "magenta",
+    },
+  }),
+  winston.format.printf((info) => {
+    let level = JSON.stringify(info.level)
+      .replace(colorRegex, "")
+      .replace(doubleQuotesRegex, "");
+    level = info.level
+      .replace(level, "text")
+      .replace("text", level.toUpperCase());
+    return `${info.timestamp} [${level}]: ${info.message}`;
+  })
+);
+
+export const logger = createLogger({
+  format: combine,
+  transports: [new winston.transports.Console()],
+});
+
 const uid = new shortUniqueId();
 cloudinary.v2.config({
   cloud_name: process.env.CLOUD_NAME,
@@ -21,30 +58,40 @@ export let db = new Datastore({
   autoload: true,
   unique: true,
 });
-// TODO ---------------------- UPDATE Image Comparison -----------------------------------
-export const is_same = async (img1: string, img2: string) => {
-  return true;
+// ---------------------- Image Comparison -----------------------------------
+export const isImageSame = async (img1: string, img2: string) => {
+  let image_1 = await pixels(img1);
+  let image_2 = await pixels(img2);
+  return (
+    pixelMatch(
+      image_1.data,
+      image_2.data,
+      null,
+      image_1.width,
+      image_1.height,
+      {
+        threshold: 0.1,
+      }
+    ) < 5000
+  );
 };
-// export const is_same = async (img1: string, img2: string) => {
-//   return new Promise((resolve, reject) => {
-//     return lsp(img1, img2, (error: string, { equal }: any) => {
-//       if (error) {
-//         return reject(error);
-//       }
-//       return resolve(equal);
-//     });
-//   });
-// };
 
 // ---------------------- Cloudinary Upload -----------------------------------
 
-export const uploadMedia = (url: string, username: string) => {
+export const uploadMedia = (url: string, username: string): Promise<string> => {
   return new Promise((resolve, reject) => {
     cloudinary.v2.uploader.upload(
       url,
-      { public_id: uid.stamp(32), folder: `${username}` },
-      (err: any, res: any) => {
+      {
+        public_id: uid.stamp(32) as string | undefined,
+        folder: `${username}` as string | undefined,
+      },
+      (
+        err: UploadApiErrorResponse | undefined,
+        res: UploadApiResponse | undefined
+      ) => {
         if (err) return reject(err);
+        if (!res) return reject(new Error("No Valid Response"));
         return resolve(res.secure_url);
       }
     );
@@ -54,12 +101,12 @@ export const uploadMedia = (url: string, username: string) => {
 export const deleteInstagramUserMedia = async (username: string) => {
   await cloudinary.v2.api
     .delete_resources_by_prefix(`InstagramUsers/${username}`)
-    .catch((err: any) => {
+    .catch(() => {
       return false;
     });
   const deletedFolder = await cloudinary.v2.api
     .delete_folder(`InstagramUsers/${username}`)
-    .catch((err: any) => {
+    .catch(() => {
       return false;
     });
   if (deletedFolder) {
@@ -75,14 +122,12 @@ export const deleteUserMedia = async (
   const folderPath = onlyMedia
     ? `Users/${username}/media`
     : `Users/${username}`;
-  await cloudinary.v2.api
-    .delete_resources_by_prefix(folderPath)
-    .catch((err: any) => {
-      return false;
-    });
+  await cloudinary.v2.api.delete_resources_by_prefix(folderPath).catch(() => {
+    return false;
+  });
   const deletedFolder = await cloudinary.v2.api
     .delete_folder(folderPath)
-    .catch((err: any) => {
+    .catch(() => {
       return false;
     });
   if (deletedFolder) {
@@ -92,10 +137,10 @@ export const deleteUserMedia = async (
 };
 
 export const logEvent = async (text: string) => {
-  const log: any = new Log({
-    text: text,
-  });
-  await log.save();
+  // const log = new Log({
+  //   text: text,
+  // });
+  // await log.save();
 };
 
 export const sendEmail = async (
@@ -136,9 +181,11 @@ export const updateInstagramUser = async (currentUser: any, user: any) => {
       }
     }
     for (let i = 0; i <= user.avatars.length - 1; i++) {
-      if (user.avatars[i].recent) {
-        avatar = user.avatars[i].url;
-        break;
+      if (user.avatars[i]) {
+        if (user.avatars[i].recent) {
+          avatar = user.avatars[i].url;
+          break;
+        }
       }
     }
   } else {
@@ -159,15 +206,12 @@ export const updateInstagramUser = async (currentUser: any, user: any) => {
     timestamp: new Date().getTime(),
     id: uid.stamp(32),
   };
-  let is_diff;
+  let isDiff: boolean = true;
   if (avatar && currentUser.avatar) {
-    is_diff = await is_same(currentUser.avatar, avatar).catch((err: any) => {
-      return false;
-    });
-  } else {
-    is_diff = false;
+    isDiff = await isImageSame(currentUser.avatar, avatar);
   }
-  if (!is_diff) {
+
+  if (!isDiff) {
     avatar = await uploadMedia(
       currentUser.avatar,
       `InstagramUsers/${user.username}/avatars`
@@ -341,10 +385,14 @@ export const createDefaultUser = async () => {
     await DEFAULT_USER.save();
     await DEFAULT_ADMIN.save();
     await DEFAULT_OWNER.save();
-    console.log(`[\x1b[36mINFO\x1b[0m]`, "CREATED DEFAULT USER");
+
+    logger.info("Default user created");
   } catch (err) {
     if ((err as { code: number }).code === 11000) {
-      console.log(`[\x1b[31mERROR\x1b[0m]`, "DEFAULT USER ALREADY EXISTS");
+      logger.info("Default user already exists");
+      logger.error("Default user already exists");
+      logger.warn("Default user already exists");
+      logger.debug("Default user already exists");
     }
   }
 };

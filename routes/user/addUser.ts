@@ -4,7 +4,7 @@ import { Router, Request, Response } from "express";
 import { User } from "../../models/user/User";
 import { uploadMedia, logEvent } from "../../main";
 import { generateTokens } from "../../auth";
-import { USER } from "../../common/types";
+import { USER } from "../../@types/types";
 import { Document } from "mongoose";
 import { DEFAULT_AVATAR_1 } from '../../common/config';
 

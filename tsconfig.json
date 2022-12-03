@@ -6,17 +6,19 @@
     "rootDir": "./",
     "moduleResolution": "node",
     "resolveJsonModule": true,
-    "outDir": "./src",
+    "outDir": "./dist",
     "removeComments": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "skipDefaultLibCheck": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "declaration": true,
+    "declarationMap": true,
+    "emitDeclarationOnly": false,
+    "baseUrl": "./@types",
+    "typeRoots": ["./@types", "./node_modules/@types"]
   },
-  "include": [
-    "*.ts",
-  ]
-
+  "include": ["*.ts", "common/declarations.d.ts"]
 }

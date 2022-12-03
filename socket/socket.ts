@@ -6,6 +6,8 @@ import { socket_checkOwner } from "./auth";
 import { Report } from "../models/report/Report";
 import { Log } from "../models/log/Log";
 
+// TODO Add RateLimiting
+
 export const socketEvent_ownerAuth = (
   event: string,
   func: Function,
@@ -64,7 +66,6 @@ export const onDeleteReport = async (socket: Socket, id: string) => {
   if (!isOwner) {
     return socket.emit("error", "Unauthorized User");
   }
-  let readStatus;
   try {
     await Report.findOneAndDelete({ _id: id });
   } catch {

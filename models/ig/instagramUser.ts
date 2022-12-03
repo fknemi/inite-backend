@@ -1,6 +1,6 @@
 import { Schema, model } from "mongoose";
 import mongoose from "mongoose";
-import { INSTAGRAM_USER } from "../../common/types";
+import { INSTAGRAM_USER } from "../../@types/types";
 const instagramUserSchema: Schema = new Schema({
   name: {
     type: String,

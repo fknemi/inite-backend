@@ -1,5 +1,5 @@
 import mongoose, { Schema, model } from "mongoose";
-import { ADMIN } from "../../common/types";
+import { ADMIN } from "../../@types/types";
 const adminSchema: Schema<ADMIN> = new Schema({
   userInfo: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   isAdmin: {

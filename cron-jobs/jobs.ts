@@ -1,19 +1,16 @@
 import { io } from "../index";
-import {
-  db,
-  getAllInstagramUsers,
-  updateInstagramUser,
-} from "../main";
+import { db, getAllInstagramUsers, updateInstagramUser } from "../main";
 import { instagramUser } from "../models/ig/instagramUser";
 import { User } from "../models/user/User";
 import * as jwt from "jsonwebtoken";
-import { findUserInDB, getAllUsersInDB } from "../main";
+import { findUserInDB, getAllUsersInDB, logger } from "../main";
 import cloudinary from "cloudinary";
 import cron from "node-cron";
 const shortUniqueId = require("short-unique-id");
 const uid = new shortUniqueId();
 
-export const updateInstagramUsers = cron.schedule("30 * * * *", async () => {
+export const updateInstagramUsers = cron.schedule("*/30 * * * *", async () => {
+  logger.info("Updating Instagram Users");
   const users: any = await instagramUser.find().populate("followedBy.user");
   const usersCurrentData: any = await getAllInstagramUsers(users);
   const allUsersChanges: Object[] = [];
@@ -29,7 +26,6 @@ export const updateInstagramUsers = cron.schedule("30 * * * *", async () => {
       }
     }
   }
-
 
   const userEmails: { following: string; email: string }[] = [];
   users.forEach(
@@ -81,7 +77,7 @@ export const updateInstagramUsers = cron.schedule("30 * * * *", async () => {
     }
     console.log(data);
     console.log(data.length);
-    
+
     usersNotNotified.push({
       username: user.username,
       following: following,
@@ -103,8 +99,7 @@ export const updateInstagramUsers = cron.schedule("30 * * * *", async () => {
         { $set: { data: [...data, ...findUser.data] } }
       );
     }
-  }
-  );
+  });
 
   const sockets: any[] = await io.fetchSockets();
   sockets.forEach(async (socket: any) => {
@@ -144,7 +139,6 @@ export const updateInstagramUsers = cron.schedule("30 * * * *", async () => {
   // To Be Implemented
   // sendBulkEmails(userEmails, allUsersChanges);
   console.log("Done");
-  
 });
 
 export const deleteCloudinaryTemp = cron.schedule("0 0 * * 0", async () => {

@@ -18,7 +18,7 @@ router.post("/login", async (req: Request, res: Response) => {
   let avatar: string;
   user.following.forEach((data: any) => {
     const iguser = data.instagramUser;
-    if (iguser.isBanned) {
+    if (iguser?.isBanned || false) {
       return;
     }
     if (iguser.avatars.length < 1) {
@@ -62,7 +62,7 @@ router.post("/login", async (req: Request, res: Response) => {
     instagramVerified: user.instagramVerified,
     followLimit: user.followLimit,
     following: following,
-    isBanned: user.isBanned,
+    isBanned: user.isBanned || false,
   };
   return res.send(userData);
 });

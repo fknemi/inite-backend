@@ -6,16 +6,24 @@ const { getUserByUsername } = require("instagram-stories");
 const router = Router();
 router.post("/user/get", async (req: Request, res: Response) => {
   let user: any;
-  user = await instagramUser.findOne({ username: req.body.username });
+  console.log(req.body.username);
+  try {
+    user = await instagramUser.findOne({ username: req.body.username });
+  } catch {}
   let biography;
   let avatar;
   if (!user) {
-    user = await getUserByUsername({
-      username: req.body.username,
-      userid: process.env.USER_ID,
-      sessionid: process.env.SESSION_ID,
-    });
-    
+    try {
+      user = await getUserByUsername({
+        username: req.body.username,
+        userid: process.env.USER_ID,
+        sessionid: process.env.SESSION_ID,
+      });
+    } catch (e) {
+      console.error(e);
+      return res.status(400).send();
+    }
+
     if (!user) {
       return res.status(404).send("User Not Found");
     }
@@ -45,14 +53,14 @@ router.post("/user/get", async (req: Request, res: Response) => {
       }
     }
     for (let i = 0; i <= user.avatars.length - 1; i++) {
-      if (user.avatars[i].recent) {
+      if (user.avatars[i] && user.avatars[i]?.recent && user.avatars[i].url) {
         avatar = user.avatars[i].url;
         break;
       }
     }
   } else {
-    biography = user.biography[0].text;
-    avatar = user.avatars[0].url;
+    biography = user.biography[0]?.text;
+    avatar = user.avatars[0]?.url;
   }
 
   if (user && user.isBanned) {

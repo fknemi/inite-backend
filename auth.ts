@@ -85,7 +85,7 @@ export const checkUser = async (
   }
   next();
 };
-export const checkAdmin = async (req: any, res: any, next: NextFunction) => {
+export const checkAdmin = async (req: Request, res: Response, next: NextFunction) => {
   const user = res.locals.user;
   if (!user) {
     return res.status(404).send("Invalid User");

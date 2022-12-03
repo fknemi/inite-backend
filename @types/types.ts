@@ -1,3 +1,12 @@
+export interface CHANGES {
+  name: { isRecent: boolean; value: undefined | string };
+  biography: { isRecent: boolean; value: undefined | string };
+  avatar: { isRecent: boolean; value: undefined | string };
+  isPrivate: { isRecent: boolean; value: undefined | boolean };
+  followedByCount: { isRecent: boolean; value: undefined | number };
+  followingCount: { isRecent: boolean; value: undefined | number };
+  postsCount: { isRecent: boolean; value: undefined | number}
+}
 export interface NOTIFICATION_CHANGED_USER {
   type: string;
   username: string;
@@ -52,7 +61,7 @@ export interface NOTIFICATION_CHANGED_USER {
     | undefined;
   timestamp: number;
   id: string;
-};
+}
 
 export type getUser = Promise<{
   username: string;
@@ -98,10 +107,17 @@ export interface USER {
 export interface INSTAGRAM_USER {
   name: string;
   username: string;
-  biography:     { recent: boolean; text: string; externalUrls: string[]; timestamp: string }[];
+  biography: {
+    recent: boolean;
+    text: string;
+    externalUrls: string[];
+    timestamp: string;
+  }[];
   avatars: { url: string; recent: boolean; timestamp: string }[];
   isPrivate: boolean;
-  media: { type: {[key: string]: any; type: string; url: string; timestamp: string }}[];
+  media: {
+    type: { [key: string]: any; type: string; url: string; timestamp: string };
+  }[];
   postsCount: number;
   followingCount: number;
   followedByCount: number;

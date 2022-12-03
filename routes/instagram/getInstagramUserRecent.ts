@@ -1,24 +1,35 @@
 // Checking for any changes of User on Instagram when a user visits their profile
 import { instagramUser } from "../../models/ig/instagramUser";
 import { Router, Request, Response } from "express";
-import { is_same, uploadMedia } from "../../main";
+import { uploadMedia, isImageSame } from "../../main";
+import { CHANGES } from "../../@types/types";
 const { getUserByUsername } = require("instagram-stories");
 const router = Router();
 router.post("/get/recent", async (req: Request, res: Response) => {
-  let user: any = await instagramUser.findOne({ username: req.body.username });
+  let user: any;
+  try {
+    user = await instagramUser.findOne({ username: req.body.username });
+  } catch {}
   if (!user) {
     return res.status(404).send({ error: "User Not Found" });
   }
-  const userCurrentData = await getUserByUsername({
-    username: req.body.username,
-    userid: process.env.USER_ID,
-    sessionid: process.env.SESSION_ID,
-  });
+  let userCurrentData;
+  try {
+    userCurrentData = await getUserByUsername({
+      username: req.body.username,
+      userid: process.env.USER_ID,
+      sessionid: process.env.SESSION_ID,
+    });
+  } catch {
+    return res.status(404).send({ error: "User Not Found" });
+  }
+
   let biography;
   let avatar;
   let updateBiography = Boolean(user.biography.length);
   let updateAvatars = Boolean(user.avatars.length);
-  let changes: any = {
+  let updateUser: boolean = false;
+  let changes: CHANGES = {
     name: { isRecent: false, value: undefined },
     biography: { isRecent: false, value: undefined },
     avatar: { isRecent: false, value: undefined },
@@ -49,16 +60,13 @@ router.post("/get/recent", async (req: Request, res: Response) => {
     }
 
     if (updateAvatars) {
-      for (let i = 0; i <= user.avatars.length - 1; i++) {
-        if (user.avatars[i].recent) {
-          avatar = user.avatars[i].url;
-          break;
-        }
-      }
+      user.avatars.forEach((userAvatar: { recent: boolean; url: string }) => {
+        userAvatar.recent ? (avatar = userAvatar.url) : null;
+      });
     }
   } else {
-    avatar = user.avatars[0].url;
-    biography = user.biography[0].text;
+    avatar = user.avatars[0]?.url;
+    biography = user.biography[0]?.text;
   }
 
   if (biography !== currentUser.biography) {
@@ -76,17 +84,17 @@ router.post("/get/recent", async (req: Request, res: Response) => {
     currentUser.avatar,
     `temp/${req.body.username}`
   );
-  let is_diff;
 
+  let isDiff: boolean = true;
   if (avatar && currentAvatar) {
-    is_diff = await is_same(currentUser.avatar, avatar).catch((err: any) => {
-      return false;
-    });
-  } else {
-    is_diff = false;
+    try {
+      isDiff = await isImageSame(currentAvatar, avatar);
+    } catch {
+      isDiff = false;
+    }
   }
 
-  if (!is_diff) {
+  if (!isDiff) {
     avatar = await uploadMedia(
       currentUser.avatar,
       `InstagramUsers/${req.body.username}/avatars`
@@ -99,8 +107,9 @@ router.post("/get/recent", async (req: Request, res: Response) => {
         item.recent = false;
       }
     }
-    user.avatars.push({ url: avatar });
+    user.avatars.push({ recent: true, url: avatar });
   }
+
   if (user.name !== currentUser.name) {
     user.name = currentUser.name;
     changes.name.isRecent = true;
@@ -124,12 +133,26 @@ router.post("/get/recent", async (req: Request, res: Response) => {
   if (user.postsCount !== currentUser.postsCount) {
     user.postsCount = currentUser.postsCount;
     changes.postsCount.isRecent = true;
-    changes.name.postsCount = currentUser.postsCount;
+    changes.postsCount.value = currentUser.postsCount;
   }
   if (user.recentlyAdded) {
     user.recentlyAdded = false;
   }
-  await user.save();
+  if (
+    changes.name.isRecent ||
+    changes.biography.isRecent ||
+    changes.avatar.isRecent ||
+    changes.followingCount.isRecent ||
+    changes.followedByCount.isRecent ||
+    changes.postsCount.isRecent ||
+    changes.isPrivate.isRecent
+  ) {
+    try {
+      await instagramUser.updateOne({ _id: user._id }, user);
+    } catch (e) {
+      console.error(e);
+    }
+  }
   return res.send(changes);
 });
 

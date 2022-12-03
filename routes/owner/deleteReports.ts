@@ -3,7 +3,7 @@ import { Router, Request, Response } from "express";
 import { Report } from "../../models/report/Report";
 const router = Router();
 router.put("/delete/reports/", async (req: Request, res: Response) => {
-  req.body.readReports.forEach(async (reportId: any) => {
+  req.body.deleteReports.forEach(async (reportId: string) => {
     let report: any = await Report.findOne({ _id: reportId });
     if (report.readStatus) {
       await Report.deleteOne({ _id: reportId });

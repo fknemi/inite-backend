@@ -1,5 +1,5 @@
 import { Router, Request, Response } from "express";
-import { NotificationSettings } from "../../common/types";
+import { NotificationSettings } from "../../@types/types";
 const router = Router();
 // Update User Settings
 router.put(

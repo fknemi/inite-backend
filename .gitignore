@@ -13,7 +13,7 @@ lerna-debug.log*
 users.db
 
 # Typescript Compiled Files
-src
+dist
 
 # Test Files
 test.ts
@@ -57,8 +57,8 @@ build/Release
 node_modules/
 jspm_packages/
 
-# TypeScript v1 declaration files
-@types
+
+
 
 # TypeScript cache
 *.tsbuildinfo
