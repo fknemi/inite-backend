@@ -7,13 +7,13 @@ const shortUniqueId = require("short-unique-id");
 const { getUserByUsername } = require("instagram-stories");
 import { NOTIFICATION_CHANGED_USER } from "./@types/types";
 import { User } from "./models/user/User";
-import { DEFAULT_AVATAR_1 } from "./common/config";
 import { Owner } from "./models/owner/Owner";
 import { Admin } from "./models/admin/Admin";
 import pixelMatch from "pixelmatch";
 import pixels from "image-pixels";
-import { Document } from "mongoose";
 import winston, { createLogger } from "winston";
+import { instagramUser } from "./models/ig/instagramUser";
+import loki from "lokijs";
 
 let colorRegex = /\\u001b\[\d+m/g,
   doubleQuotesRegex = /"/g;
@@ -52,12 +52,15 @@ cloudinary.v2.config({
   api_key: process.env.API_KEY,
   api_secret: process.env.API_SECRET,
 });
-let Datastore = require("nedb");
-export let db = new Datastore({
-  filename: "users.db",
+export let db = new loki("users.db", {
   autoload: true,
-  unique: true,
+  autosave: true,
+  autosaveInterval: 4000,
+  persistenceMethod: "fs",
 });
+db.addCollection("users");
+export let usersDB = db.getCollection("users");
+
 // ---------------------- Image Comparison -----------------------------------
 export const isImageSame = async (img1: string, img2: string) => {
   let image_1 = await pixels(img1);
@@ -175,17 +178,15 @@ export const updateInstagramUser = async (currentUser: any, user: any) => {
   let avatar: any;
   if (!user.recentlyAdded) {
     for (let i = 0; i <= user.biography.length - 1; i++) {
-      if (user.biography[i].recent) {
+      if (user.biography[i] && user.biography[i].recent) {
         biography = user.biography[i].text;
         break;
       }
     }
     for (let i = 0; i <= user.avatars.length - 1; i++) {
-      if (user.avatars[i]) {
-        if (user.avatars[i].recent) {
-          avatar = user.avatars[i].url;
-          break;
-        }
+      if (user.avatars[i] && user.avatars[i].recent) {
+        avatar = user.avatars[i].url;
+        break;
       }
     }
   } else {
@@ -208,7 +209,12 @@ export const updateInstagramUser = async (currentUser: any, user: any) => {
   };
   let isDiff: boolean = true;
   if (avatar && currentUser.avatar) {
-    isDiff = await isImageSame(currentUser.avatar, avatar);
+    try {
+      isDiff = await isImageSame(currentUser.avatar, avatar);
+    } catch (e) {
+      logger.error(e);
+      isDiff = false;
+    }
   }
 
   if (!isDiff) {
@@ -216,6 +222,7 @@ export const updateInstagramUser = async (currentUser: any, user: any) => {
       currentUser.avatar,
       `InstagramUsers/${user.username}/avatars`
     );
+
     changedUser.avatar = {
       didChange: true,
       oldValue: user.avatar,
@@ -290,15 +297,22 @@ export const updateInstagramUser = async (currentUser: any, user: any) => {
     }
   }
   if (
-    changedUser.name ||
-    changedUser.biography ||
-    changedUser.avatar ||
-    changedUser.isPrivate !== undefined ||
-    changedUser.followedByCount ||
-    changedUser.followingCount ||
-    changedUser.postsCount
+    changedUser.name?.didChange ||
+    changedUser.biography?.didChange ||
+    changedUser.avatar?.didChange ||
+    changedUser.isPrivate?.didChange ||
+    changedUser.followedByCount?.didChange ||
+    changedUser.followingCount?.didChange ||
+    changedUser.postsCount?.didChange
   ) {
-    await user.save();
+    try {
+      if (user.recentlyAdded) {
+        user.recentlyAdded = false;
+      }
+      await instagramUser.updateOne({ _id: user._id }, user);
+    } catch (e) {
+      logger.error(e);
+    }
     return changedUser;
   }
   return {};
@@ -314,11 +328,15 @@ export const getAllInstagramUsers = async (users: any) => {
       sessionid: process.env.SESSION_ID,
     });
 
+    let avatar = await uploadMedia(
+      data.user.profile_pic_url_hd,
+      `temp/${username}`
+    );
     currentUsersData.push({
       name: data.user.full_name ? data.user.full_name : "",
       username: username,
       biography: data.user.biography ? data.user.biography : "",
-      avatar: data.user.profile_pic_url_hd,
+      avatar: avatar,
       isPrivate: data.user.is_private,
       followedByCount: data.user.edge_followed_by.count,
       followingCount: data.user.edge_follow.count,
@@ -337,25 +355,17 @@ export const sendBulkEmails = async (
 };
 
 export const getAllUsersInDB = async () => {
-  return new Promise((resolve, reject) => {
-    db.find({}, (err: string, docs: Object[]) => {
-      if (err) {
-        return reject(err);
-      }
-      return resolve(docs);
-    });
-  });
+  return usersDB.data;
 };
 
 export const findUserInDB = async (username: string) => {
-  return new Promise((resolve, reject) => {
-    db.findOne({ username: username }, (err: string, docs: Object[]) => {
-      if (err) {
-        return reject(false);
-      }
-      return resolve(docs);
+  try {
+    return usersDB.findOne({
+      username: username,
     });
-  });
+  } catch {
+    return null;
+  }
 };
 
 export const createDefaultUser = async () => {
@@ -365,7 +375,7 @@ export const createDefaultUser = async () => {
     password: "1234",
     email: process.env.DEFAULT_USER_OWNER_EMAIL,
     gender: "_",
-    avatar: DEFAULT_AVATAR_1,
+    avatar: process.env.DEFAULT_AVATAR_1,
     emailVerified: false,
     roles: {
       isAdmin: true,
@@ -389,10 +399,7 @@ export const createDefaultUser = async () => {
     logger.info("Default user created");
   } catch (err) {
     if ((err as { code: number }).code === 11000) {
-      logger.info("Default user already exists");
-      logger.error("Default user already exists");
       logger.warn("Default user already exists");
-      logger.debug("Default user already exists");
     }
   }
 };

@@ -1,10 +1,10 @@
 import { Socket } from "socket.io";
 import { User } from "../models/user/User";
-import { db, findUserInDB } from "../main";
 import * as jwt from "jsonwebtoken";
 import { socket_checkOwner } from "./auth";
 import { Report } from "../models/report/Report";
 import { Log } from "../models/log/Log";
+import { findUserInDB, usersDB } from "../main";
 
 // TODO Add RateLimiting
 
@@ -41,17 +41,9 @@ export const onConnect = async (socket: Socket) => {
     socket.emit("notifications", getUser.data);
     socket.on("status", (status: string) => {
       if (parseInt(status) === 200) {
-        db.remove(
-          { username: user.username },
-          {},
-          (err: any, numRemoved: any) => {
-            if (err) {
-              console.log(err);
-            } else {
-              console.log("Removed");
-            }
-          }
-        );
+        usersDB.findAndRemove({
+          username: user.username,
+        });
       }
     });
   }

@@ -1,18 +1,34 @@
 import { io } from "../index";
-import { db, getAllInstagramUsers, updateInstagramUser } from "../main";
+import {
+  findUserInDB,
+  getAllInstagramUsers,
+  logger,
+  updateInstagramUser,
+  usersDB,
+} from "../main";
 import { instagramUser } from "../models/ig/instagramUser";
 import { User } from "../models/user/User";
 import * as jwt from "jsonwebtoken";
-import { findUserInDB, getAllUsersInDB, logger } from "../main";
 import cloudinary from "cloudinary";
 import cron from "node-cron";
 const shortUniqueId = require("short-unique-id");
-const uid = new shortUniqueId();
+
 
 export const updateInstagramUsers = cron.schedule("*/30 * * * *", async () => {
   logger.info("Updating Instagram Users");
-  const users: any = await instagramUser.find().populate("followedBy.user");
-  const usersCurrentData: any = await getAllInstagramUsers(users);
+  let users: any;
+  try {
+    users = await instagramUser.find().populate("followedBy.user");
+  } catch (e) {
+    logger.error(e);
+  }
+  let usersCurrentData: any;
+  try {
+    usersCurrentData = await getAllInstagramUsers(users);
+  } catch (e) {
+    logger.error(e);
+  }
+
   const allUsersChanges: Object[] = [];
 
   for (let i = 0; i <= users.length - 1; i++) {
@@ -75,8 +91,6 @@ export const updateInstagramUsers = cron.schedule("*/30 * * * *", async () => {
     if (!data.length) {
       return;
     }
-    console.log(data);
-    console.log(data.length);
 
     usersNotNotified.push({
       username: user.username,
@@ -86,17 +100,17 @@ export const updateInstagramUsers = cron.schedule("*/30 * * * *", async () => {
     });
 
     if (!findUser) {
-      db.insert(usersNotNotified, (err: any, newDoc: any) => {
-        if (err) {
-          console.log(err);
-        } else {
-          console.log("Inserted");
-        }
+      usersDB.insertOne({
+        usersNotNotified,
       });
     } else {
-      db.update(
-        { username: user.username },
-        { $set: { data: [...data, ...findUser.data] } }
+      usersDB.updateWhere(
+        (data) => {
+          return data.username === user.username;
+        },
+        (data) => {
+          data.data = [...data, ...findUser.data];
+        }
       );
     }
   });
@@ -112,24 +126,16 @@ export const updateInstagramUsers = cron.schedule("*/30 * * * *", async () => {
       const user: any = await User.findById(userId).populate(
         "following.instagramUser"
       );
-      const getUser: any = await findUserInDB(user.username);
+      const getUser = await findUserInDB(user.username);
 
-      socket.emit("notifications", getUser.data);
+      socket.emit("notifications", getUser);
       socket.on("status", (status: string) => {
         if (parseInt(status) === 200) {
-          db.remove(
-            { username: user.username },
-            {},
-            (err: any, numRemoved: any) => {
-              if (err) {
-                console.log(err);
-              } else {
-                console.log("Removed");
-              }
-            }
-          );
+          usersDB.findAndRemove({
+            username: user.username,
+          });
         } else {
-          socket.emit("notifications", getUser.data);
+          socket.emit("notifications", getUser);
         }
       });
     } catch (err) {

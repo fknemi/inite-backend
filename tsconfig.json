@@ -20,5 +20,6 @@
     "baseUrl": "./@types",
     "typeRoots": ["./@types", "./node_modules/@types"]
   },
-  "include": ["*.ts", "common/declarations.d.ts"]
+  "include": ["*.ts", "common/declarations.d.ts"],
+  "exclude": ["node_modules", "dist", "test.ts"]
 }

@@ -42,7 +42,7 @@ import { router as deleteReports } from "./owner/deleteReports";
 import { router as deleteLogs } from "./owner/deleteLogs";
 import { router as getReadReports } from "./owner/getReadReports";
 import { router as unlinkUserInstagram } from "./user/unlinkUserInstagram";
-import { router as linkUserInstagram } from "./user/linkUserInstagran";
+import { router as linkUserInstagram } from "./user/linkUserInstagram";
 // import { router as verifyUserInstagram } from "./user/verifyUserInstagram";
 const router = Router();
 const admin = Router();

@@ -4,10 +4,7 @@ import cors from "cors";
 import mongoose from "mongoose";
 import { admin, instagram, owner, router } from "./routes/index";
 import { checkUser, checkAdmin, checkOwner } from "./auth";
-import {
-  updateInstagramUsers,
-  deleteCloudinaryTemp,
-} from "./cron-jobs/jobs";
+import { updateInstagramUsers, deleteCloudinaryTemp } from "./cron-jobs/jobs";
 import * as http from "http";
 import { Server, Socket } from "socket.io";
 import * as jwt from "jsonwebtoken";
@@ -59,3 +56,5 @@ const startServer = async () => {
 };
 
 startServer();
+
+export default app;
